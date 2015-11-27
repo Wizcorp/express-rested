@@ -96,30 +96,35 @@ beers.persist(function () {
 
 ## Supported REST calls
 
-|           | GET               | POST               | PUT                        | DELETE            |
-| --------- | ----------------- | ------------------ | -------------------------- | ----------------- |
-| /beer     | Returns all IDs   | Creates a new beer | Not (yet) supported        | Deletes all beers |
-| /beer/123 | Returns a beer    | Not supported      | Creates or replaces a beer | Deletes a beer    |
+|           | GET               | POST               | PUT                       | DELETE            |
+| --------- | ----------------- | ------------------ | ------------------------- | ----------------- |
+| /beer     | Returns all IDs   | Creates a new beer | Not (yet) supported       | Deletes all beers |
+| /beer/123 | Returns a beer    | Not supported      | Creates or updates a beer | Deletes a beer    |
 
 
-## Rules for resources
+## Resources
 
-### A resource's constructor(id, info) MUST accept an ID and a value with information
+Resources can be passed as any class or constructor function. There are a few APIs however that you must or may
+implement for things to work.
+
+### Resource API
+
+#### A resource's constructor(id, info) MUST accept an ID and a value with information
 
 * `id`: This will often be undefined, since the ID will be set through setId or createId (see below), but when given it
   must be set on the object.
 * `info`: This will often be an object, but can be any value that is passed as a PUT/POST body.
 
-### A resource MAY have an edit(info) method that accepts the same object with information
+#### A resource MAY have an edit(info) method that accepts the same object with information
 
 * `info`: Like the constructor's info value. This will often be an object, but can be any value that is passed as a
   PUT/POST body.
 
-### A resource MUST have a getId() method
+#### A resource MUST have a getId() method
 
 * This method should return the ID of the resource.
 
-### A resource MUST have a createId() OR a setId(id) method
+#### A resource MUST have a createId() OR a setId(id) method
 
 * `createId()` must self-create an ID and store it on the resource. A typical example would be to use a UUID, or a
   unique trait of the object itself (like a username). `getId()` *must* respond with this value.
