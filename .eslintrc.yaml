@@ -37,7 +37,7 @@ rules:
   accessor-pairs: 0
   block-scoped-var: 2
   complexity: [1, 10]
-  consistent-return: 2
+  consistent-return: 0
   curly: [2, all]
   default-case: 2
   dot-notation: 2

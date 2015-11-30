@@ -6,21 +6,21 @@ class Beer {
 		this.edit(info);
 	}
 
-	createId() {
-		this.id = this.name;
+	edit(info) {
+		this.name = info.name;
+		this.rating = info.rating;
 	}
 
-	getId() {
-		return this.id;
+	createId() {
+		this.id = this.name;
 	}
 
 	setId(id) {
 		this.id = id;
 	}
 
-	edit(info) {
-		this.name = info.name;
-		this.rating = info.rating;
+	getId() {
+		return this.id;
 	}
 }
 

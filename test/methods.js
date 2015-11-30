@@ -39,6 +39,25 @@ test('Methods', function (t) {
 		rating: 5
 	};
 
+	const demolen = {
+		id: 'DeMolen',
+		name: 'De Molen - Hop en Liefde',
+		rating: 5
+	};
+
+	const all = {
+		'Heineken': heineken,
+		'SuntoryPremium': suntory,
+		'Rochefort': rochefort,
+		'DeMolen': demolen
+	};
+
+	const allButSuntory = {
+		'Heineken': heineken,
+		'Rochefort': rochefort,
+		'DeMolen': demolen
+	};
+
 	t.test('POST /rest/beer (Heineken)', function (t) {
 		http.post(t, '/beer', heineken, function (data) {
 			heineken.id = heineken.name;
@@ -86,9 +105,23 @@ test('Methods', function (t) {
 		});
 	});
 
+	t.test('PUT /beer', function (t) {
+		http.put(t, '/beer', all, function () {
+			t.deepEqual(collection.getAll(), all, 'Replaced entire collection');
+			t.end();
+		});
+	});
+
+	t.test('PUT /beer', function (t) {
+		http.put(t, '/beer', allButSuntory, function () {
+			t.deepEqual(collection.getAll(), allButSuntory, 'Replaced entire collection (Suntory is out)');
+			t.end();
+		});
+	});
+
 	t.test('DELETE /beer/Heineken', function (t) {
 		http.delete(t, '/beer/Heineken', function () {
-			t.deepEqual([rochefort.id, suntory.id], collection.getIds().sort(), 'Heineken is out');
+			t.deepEqual([demolen.id, rochefort.id], collection.getIds().sort(), 'Heineken is out');
 			t.end();
 		});
 	});

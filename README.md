@@ -49,7 +49,7 @@ module.exports = Beer;
 `index.js`
 
 ```js
-// dependency joy
+// Dependency joy
 
 const fs = require('fs');
 const express = require('express');
@@ -57,10 +57,14 @@ const bodyParser = require('body-parser');
 const rested = require('express-rested');
 
 const app = express();
-const restRouter = new express.Router();
-
 app.use(bodyParser.json());
+
+// Create a dedicated router for our rest endpoint
+
+const restRouter = new express.Router();
 app.use('/api/rest', restRouter);
+
+// Instantiate express-rested with the router
 
 const rest = rested(restRouter);
 
@@ -83,11 +87,15 @@ const beers = rest.add('/beer', Beer, {
 	}
 });
 
+// Load up the collection
+
+beers.loadMap(require('./db/beers.json'));
+
 // Storage logic
 
-beers.persist(function () {
+beers.persist(function (ids, cb) {
 	const str = JSON.stringify(this.getAll());
-	fs.writeFileSync('beers.json', str);
+	fs.writeFile('./db/beers.json', str, cb);
 });
 ```
 
@@ -96,41 +104,108 @@ beers.persist(function () {
 
 ## Supported REST calls
 
-|           | GET               | POST               | PUT                       | DELETE            |
-| --------- | ----------------- | ------------------ | ------------------------- | ----------------- |
-| /beer     | Returns all IDs   | Creates a new beer | Not (yet) supported       | Deletes all beers |
-| /beer/123 | Returns a beer    | Not supported      | Creates or updates a beer | Deletes a beer    |
+|           | GET               | POST               | PUT                             | DELETE            |
+| --------- | ----------------- | ------------------ | ------------------------------- | ----------------- |
+| /beer     | Returns all IDs   | Creates a new beer | Sets the entire beer collection | Deletes all beers |
+| /beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Deletes a beer    |
 
 
-## Resources
+## API
 
-Resources can be passed as any class or constructor function. There are a few APIs however that you must or may
+Resource types can be declared as any class or constructor function. There are a few APIs however that you must or may
 implement for things to work.
 
 ### Resource API
 
-#### A resource's constructor(id, info) MUST accept an ID and a value with information
+Your resource class may expose the following APIs:
 
-* `id`: This will often be undefined, since the ID will be set through setId or createId (see below), but when given it
-  must be set on the object.
-* `info`: This will often be an object, but can be any value that is passed as a PUT/POST body.
+**constructor(string|null id, Object info)**
 
-#### A resource MAY have an edit(info) method that accepts the same object with information
+This allows you to load objects into the collection. During a POST, the `id` may be `null`. The ID (regardless of
+whether it is a string or `null`) should always be returned as-is by getId() (see below).
 
-* `info`: Like the constructor's info value. This will often be an object, but can be any value that is passed as a
-  PUT/POST body.
+Required for HTTP methods: POST, PUT.
 
-#### A resource MUST have a getId() method
+**edit(Object info) (optional)**
 
-* This method should return the ID of the resource.
+This enables updating of the resource value. The `info` argument is like the one in the constructor.
 
-#### A resource MUST have a createId() OR a setId(id) method
+Required for HTTP method: PUT
 
-* `createId()` must self-create an ID and store it on the resource. A typical example would be to use a UUID, or a
-  unique trait of the object itself (like a username). `getId()` *must* respond with this value.
-* `setId(id)` can alternatively be exposed to allow PUT calls to define the ID for a new object. This method too must
-  store the value on the resource. `getId()` *must* respond with this value.
+**setId(string id) (optional)**
 
+This should store an ID on the resource.
+
+Required for HTTP method: PUT
+
+**getId() -> string|null (optional)**
+
+Should always return the current ID of the resource.
+
+Required for HTTP methods: GET, POST, PUT
+
+**createId() -> string (optional)**
+
+Should always return an ID that is fairly unique. It could be a UUID, but a username on a User resource would also be
+perfectly fine. It's not the resource's job to ensure uniqueness. ID collisions will be handled gracefully by
+express-rested. The `createId()` method also does not have to store the ID it generates.
+
+Required for HTTP method: POST
+
+### The resource collection
+
+**rest.add(string path, constructor Class, Object options) -> Collection**
+
+Creates a collection for objects of type `Class`.
+
+**collection.loadMap(Object map)**
+
+Fills up the collection with all objects in the map. The key in the map will be used as the ID. For each object,
+`new Class(key, object)` will be called to instantiate the resource.
+
+**collection.has(id) -> boolean**
+
+Returns `true` if the collection has a resource for the given `id`, `false` otherwise.
+
+**collection.get(id) -> Class|undefined**
+
+Returns the resource with the given `id` it it exists, `undefined` otherwise.
+
+**collection.getIds() -> string[]**
+
+Returns all IDs in the collection.
+
+**collection.getAll() -> Object**
+
+Returns a copy of the complete map of all resources.
+
+**collection.list() -> Class[]**
+
+Returns all resources as an array.
+
+**collection.set(Class resource, Function cb)**
+
+Ensures inclusion of the given resource into the collection. Triggers the `persist` callback.
+
+**collection.setAll(Class resources[], Function cb)**
+
+Deletes all resources not given, and creates or updates all resources given in the `resources` array. Triggers the
+`persist` callback.
+
+**collection.del(string id, Function cb)**
+
+Deletes a single resource from the collection. Triggers the `persist` callback.
+
+**collection.delAll(Function cb)**
+
+Empties the entire collection. Triggers the `persist` callback.
+
+**collection.persist(function (string ids[], [Function cb]) { })**
+
+Registers a function that will be called on any change to the collection, and is passed an array of IDs that were
+affected. If you pass a callback, you will have a chance to do asynchronous operations and return an error on failure.
+This error will find its way to the client as an Internal Service Error (500). If you don't pass a callback, you may
+still throw an exception to achieve the same.
 
 ## License
 
