@@ -106,8 +106,8 @@ beers.persist(function (ids, cb) {
 
 |           | GET               | POST               | PUT                             | DELETE            |
 | --------- | ----------------- | ------------------ | ------------------------------- | ----------------- |
-| /beer     | Returns all IDs   | Creates a new beer | Sets the entire beer collection | Deletes all beers |
-| /beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Deletes a beer    |
+| /Beer     | Returns all beers | Creates a new beer | Sets the entire beer collection | Deletes all beers |
+| /Beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Deletes a beer    |
 
 
 ## API
@@ -123,13 +123,15 @@ Your resource class may expose the following APIs:
 **constructor(string|null id, Object info)**
 
 This allows you to load objects into the collection. During a POST, the `id` may be `null`. The ID (regardless of
-whether it is a string or `null`) should always be returned as-is by getId() (see below).
+whether it is a string or `null`) should always be returned as-is by getId() (see below). If the data in `info` is not
+what it's supposed to be, you may throw an error to bail out.
 
 Required for HTTP methods: POST, PUT.
 
 **edit(Object info) (optional)**
 
-This enables updating of the resource value. The `info` argument is like the one in the constructor.
+This enables updating of the resource value. The `info` argument is like the one in the constructor. If the data in
+`info` is not what it's supposed to be, you may throw an error to bail out.
 
 Required for HTTP method: PUT
 

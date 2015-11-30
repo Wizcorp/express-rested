@@ -24,10 +24,10 @@ function respond(t, res, cb) {
 				return t.end();
 			}
 
-			return cb(result);
+			return cb(result, res);
 		}
 
-		return cb(str);
+		return cb(str, res);
 	});
 }
 
@@ -50,7 +50,7 @@ class HttpClient {
 	url(method, path) {
 		const url = parseUrl(this.baseUrl);
 		url.method = method;
-		url.path += path;
+		url.path = path;
 
 		if (method === 'PUT' || method === 'POST') {
 			url.headers = url.headers || {};
