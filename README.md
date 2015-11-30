@@ -83,7 +83,7 @@ const beers = rest.add(Beer, {
 		},
 		update: function (req, res, resource) {
 			return res.locals.isAdmin;  // admins can update
-		}
+		}e
 	}
 });
 
@@ -181,9 +181,10 @@ will be used (and prefixed with `/`, eg.: `'/Beer'`).
 
 Options (all optional):
 
+* rights: an object, boolean or function that will be applied to all CRUD operations (read on for the applied logic).
 * rights.create: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not creation
   of this resource may occur.
-* rights.cread: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not reading
+* rights.read: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not reading
   of this resource may occur.
 * rights.update: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not updating
   of this resource may occur.
