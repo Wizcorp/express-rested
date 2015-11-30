@@ -74,7 +74,7 @@ const Beer = require('./resources/Beer');
 
 // Create a beers collection and define user access rights
 
-const beers = rest.add('/beer', Beer, {
+const beers = rest.add(Beer, {
 	rights: {
 		read: true,     // anybody can read
 		delete: false,  // nobody can delete
@@ -115,6 +115,7 @@ beers.persist(function (ids, cb) {
 Resource types can be declared as any class or constructor function. There are a few APIs however that you must or may
 implement for things to work.
 
+
 ### Resource API
 
 Your resource class may expose the following APIs:
@@ -152,16 +153,56 @@ express-rested. The `createId()` method also does not have to store the ID it ge
 
 Required for HTTP method: POST
 
-### The resource collection
 
-**rest.add(string path, constructor Class, Object options) -> Collection**
+### Rest library API
 
-Creates a collection for objects of type `Class`.
+Importing the library:
+
+**const rested = require('express-rested');**
+
+This imports the library itself.
+
+**const rest = rested([express.Router restRouter]);**
+
+Instantiates a rest object on which you can create collections for resources.
+
+Make sure that the express router you want to use has the JSON body parser enabled. Else we won't be able to receive
+data. Also, ensure that it listens for incoming requests on a reasonable base URL (such as `/rest`). The URLs to our
+collections will sit on top of this. The router is optional, but as you can imagine it hardly makes sense to use this
+library without having it register HTTP routes.
+
+**rest.add(constructor Class[, string path, Object options]) -> Collection**
+
+Creates and returns a collection for objects of type `Class`. If you have set up an Express Router, all routes to this
+collection will automatically be registered on it. The `path` you provide will be the sub-path on which all routes
+are registered. For example the path `/beer` will sit on top of the base path (eg: `/rest`) and will therefore respond
+to HTTP requests to the full route that is `/rest/beer`. If you do not provide a path, the name of the class you provide
+will be used (and prefixed with `/`, eg.: `'/Beer'`).
+
+Options (all optional):
+
+* rights.create: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not creation
+  of this resource may occur.
+* rights.cread: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not reading
+  of this resource may occur.
+* rights.update: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not updating
+  of this resource may occur.
+* rights.delete: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not deletion
+  of this resource may occur.
+* persist: a function that will be called after each modification of the collection. See the documentation on `persist`
+  below for more information on the function signature.
+
+
+### Resource collection API
 
 **collection.loadMap(Object map)**
 
 Fills up the collection with all objects in the map. The key in the map will be used as the ID. For each object,
 `new Class(key, object)` will be called to instantiate the resource.
+
+**collection.loadOne(string id, Object info)**
+
+This instantiates a resource object from `info` and loads it into the collection.
 
 **collection.has(id) -> boolean**
 
@@ -206,6 +247,7 @@ Registers a function that will be called on any change to the collection, and is
 affected. If you pass a callback, you will have a chance to do asynchronous operations and return an error on failure.
 This error will find its way to the client as an Internal Service Error (500). If you don't pass a callback, you may
 still throw an exception to achieve the same.
+
 
 ## License
 

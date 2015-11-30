@@ -15,7 +15,7 @@ module.exports = function (t, options, cb) {
 	app.use(bodyParser.json());
 	app.use('/rest', router);
 
-	const collection = rested.add(path, Beer, options);
+	const collection = rested.add(Beer, path, options);
 
 	const server = http.createServer(app);
 

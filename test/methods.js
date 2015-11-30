@@ -59,7 +59,7 @@ test('Methods', function (t) {
 	};
 
 	t.test('POST /rest/beer (Heineken)', function (t) {
-		http.post(t, '/beer', heineken, function (data) {
+		http.post(t, '/Beer', heineken, function (data) {
 			heineken.id = heineken.name;
 
 			t.deepEqual(data, heineken, 'Heineken returned');
