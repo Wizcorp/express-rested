@@ -83,7 +83,7 @@ const beers = rest.add(Beer, {
 		},
 		update: function (req, res, resource) {
 			return res.locals.isAdmin;  // admins can update
-		}e
+		}
 	}
 });
 
