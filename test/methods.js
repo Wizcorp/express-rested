@@ -146,7 +146,7 @@ test('Methods', function (t) {
 	t.test('PUT /rest/beer', function (t) {
 		http.put(t, '/rest/beer', all, function (data, res) {
 			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
-			t.deepEqual(collection.getAll(), all, 'Replaced entire collection');
+			t.deepEqual(collection.getMap(), all, 'Replaced entire collection');
 			t.end();
 		});
 	});
@@ -154,7 +154,7 @@ test('Methods', function (t) {
 	t.test('PUT /rest/beer', function (t) {
 		http.put(t, '/rest/beer', allButSuntory, function (data, res) {
 			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
-			t.deepEqual(collection.getAll(), allButSuntory, 'Replaced entire collection (Suntory is out)');
+			t.deepEqual(collection.getMap(), allButSuntory, 'Replaced entire collection (Suntory is out)');
 			t.end();
 		});
 	});
