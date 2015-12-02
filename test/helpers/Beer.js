@@ -2,7 +2,7 @@
 
 class Beer {
 	constructor(id, info) {
-		this.setId(id);
+		this.id = id;
 		this.edit(info);
 	}
 
@@ -13,13 +13,6 @@ class Beer {
 
 	createId() {
 		this.id = this.name;
-	}
-
-	setId(id) {
-		this.id = id;
-	}
-
-	getId() {
 		return this.id;
 	}
 }

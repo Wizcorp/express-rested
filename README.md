@@ -29,12 +29,13 @@ npm install --save express-rested
 ```js
 class Beer() {
 	constructor(id, info) {
-		this.setId(id);
+		this.id = id;
 		this.edit(info);
 	}
 
-	setId(id) {
-		this.id = id;
+	createId() {
+		this.id = this.name;
+		return this.id;
 	}
 
 	edit(info) {
@@ -122,9 +123,9 @@ Your resource class may expose the following APIs:
 
 **constructor(string|null id, Object info)**
 
-This allows you to load objects into the collection. During a POST, the `id` may be `null`. The ID (regardless of
-whether it is a string or `null`) should always be returned as-is by getId() (see below). If the data in `info` is not
-what it's supposed to be, you may throw an error to bail out.
+This allows you to load objects into the collection. During a POST, the `id` will be `null`, as it will be assigned at
+a later time using `createId()` (see below). If the data in `info` is not what it's supposed to be, you may throw an
+error to bail out.
 
 Required for HTTP methods: POST, PUT.
 
@@ -135,23 +136,11 @@ This enables updating of the resource value. The `info` argument is like the one
 
 Required for HTTP method: PUT
 
-**setId(string id) (optional)**
-
-This should store an ID on the resource.
-
-Required for HTTP method: PUT
-
-**getId() -> string|null (optional)**
-
-Should always return the current ID of the resource.
-
-Required for HTTP methods: GET, POST, PUT
-
 **createId() -> string (optional)**
 
 Should always return an ID that is fairly unique. It could be a UUID, but a username on a User resource would also be
 perfectly fine. It's not the resource's job to ensure uniqueness. ID collisions will be handled gracefully by
-express-rested. The `createId()` method also does not have to store the ID it generates.
+express-rested. The `createId()` method **must** store the ID it generates and returns.
 
 Required for HTTP method: POST
 
@@ -219,15 +208,15 @@ Returns the resource with the given `id` it it exists, `undefined` otherwise.
 
 Returns all IDs in the collection.
 
-**collection.getAll() -> Object**
+**collection.getMap() -> Object**
 
 Returns a copy of the complete map of all resources.
 
-**collection.list() -> Class[]**
+**collection.getList() -> Class[]**
 
 Returns all resources as an array.
 
-**collection.set(Class resource, Function cb)**
+**collection.set(string id, Class resource, Function cb)**
 
 Ensures inclusion of the given resource into the collection. Triggers the `persist` callback.
 
