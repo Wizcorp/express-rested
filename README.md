@@ -54,11 +54,9 @@ module.exports = Beer;
 
 const fs = require('fs');
 const express = require('express');
-const bodyParser = require('body-parser');
 const rested = require('express-rested');
 
 const app = express();
-app.use(bodyParser.json());
 
 // Create a dedicated router for our rest endpoint
 

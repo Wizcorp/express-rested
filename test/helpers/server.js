@@ -12,7 +12,10 @@ module.exports = function (t, options, cb) {
 	const router = new express.Router();
 	const rested = require('../../')(router);
 
-	app.use(bodyParser.json());
+	if (options.autoParse) {
+		app.use(bodyParser.json());
+	}
+
 	app.use('/rest', router);
 
 	const collection = rested.add(Beer, path, options);
