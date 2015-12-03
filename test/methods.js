@@ -17,7 +17,7 @@ test('Methods', function (t) {
 
 	let server, collection, http;
 
-	t.test('Start REST server', function (t) {
+	t.test('Start REST server (without body parser)', function (t) {
 		createServer(t, options, function (_server, _collection, _http) {
 			server = _server;
 			collection = _collection;
