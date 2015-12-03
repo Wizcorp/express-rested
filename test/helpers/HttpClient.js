@@ -4,6 +4,15 @@ const request = require('http').request;
 const parseUrl = require('url').parse;
 
 
+function serialize(body) {
+	if (Buffer.isBuffer(body)) {
+		return body;
+	}
+
+	return JSON.stringify(body);
+}
+
+
 function respond(t, res, cb) {
 	res.setEncoding('utf8');
 
@@ -50,6 +59,15 @@ function failer(t) {
 class HttpClient {
 	constructor(baseUrl) {
 		this.baseUrl = baseUrl;
+		this.overrideHeaders = {};
+	}
+
+	overrideHeader(name, value) {
+		if (value === undefined) {
+			delete this.overrideHeaders[name];
+		} else {
+			this.overrideHeaders[name] = value;
+		}
 	}
 
 	url(method, path) {
@@ -60,6 +78,12 @@ class HttpClient {
 		if (method === 'PUT' || method === 'POST') {
 			url.headers = url.headers || {};
 			url.headers['content-type'] = 'application/json';
+		}
+
+		for (const name in this.overrideHeaders) {
+			if (this.overrideHeaders.hasOwnProperty(name)) {
+				url.headers[name] = this.overrideHeaders[name];
+			}
 		}
 
 		return url;
@@ -89,7 +113,7 @@ class HttpClient {
 		});
 
 		req.on('error', failer(t));
-		req.write(JSON.stringify(data));
+		req.write(serialize(data));
 		req.end();
 	}
 
@@ -99,7 +123,7 @@ class HttpClient {
 		});
 
 		req.on('error', failer(t));
-		req.write(JSON.stringify(data));
+		req.write(serialize(data));
 		req.end();
 	}
 
