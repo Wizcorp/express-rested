@@ -103,8 +103,18 @@ test('Methods', function (t) {
 	t.test('GET /rest/beer/Heineken', function (t) {
 		http.get(t, '/rest/beer/Heineken', function (data, res) {
 			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.equal(res.headers['content-type'], 'application/json', 'JSON response');
 			t.deepEqual(data, heineken, 'Heineken returned');
 			t.deepEqual(data, collection.get('Heineken'), 'Heineken in collection');
+			t.end();
+		});
+	});
+
+	t.test('HEAD /rest/beer/Heineken', function (t) {
+		http.head(t, '/rest/beer/Heineken', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.equal(res.headers['content-type'], 'application/json', 'JSON response');
+			t.equal(data, '', 'No response body');
 			t.end();
 		});
 	});

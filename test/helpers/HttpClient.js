@@ -17,6 +17,11 @@ function respond(t, res, cb) {
 		let result;
 
 		if ((res.headers['content-type'] || '').startsWith('application/json')) {
+			if (str.length === 0) {
+				// HEAD response?
+				return cb(str, res);
+			}
+
 			try {
 				result = JSON.parse(str);
 			} catch (error) {
@@ -62,6 +67,15 @@ class HttpClient {
 
 	get(t, path, cb) {
 		const req = request(this.url('GET', path), function (res) {
+			respond(t, res, cb);
+		});
+
+		req.on('error', failer(t));
+		req.end();
+	}
+
+	head(t, path, cb) {
+		const req = request(this.url('HEAD', path), function (res) {
 			respond(t, res, cb);
 		});
 
