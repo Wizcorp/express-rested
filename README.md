@@ -13,6 +13,7 @@ when adding any logic, can be a bit of a pain. This module helps you get around 
 * Any object can be a resource, you register its constructor (or ES6 class).
 * The resource classes you define can be used in browser as well as in Node.js, so you can write universal JavaScript.
 * Resources are always sent back to the client in JSON format.
+* In URLs, you may refer to resources with or without `.json` extension.
 
 
 ## Installation
@@ -22,7 +23,9 @@ npm install --save express-rested
 ```
 
 
-## Example
+## Usage
+
+### Given a resource "Beer"
 
 `resources/Beer.js`
 
@@ -47,33 +50,35 @@ class Beer() {
 module.exports = Beer;
 ```
 
-`index.js`
+### Examples
+
+#### Base example
 
 ```js
-// Dependency joy
+const app = require('express')();
+const rest = require('express-rested')(app);
 
-const fs = require('fs');
-const express = require('express');
-const rested = require('express-rested');
+rest.add(require('./resources/Beer'), '/rest/beers');
 
-const app = express();
+app.listen(3000);
+```
 
-// Create a dedicated router for our rest endpoint
+#### Persisting data
 
-const restRouter = new express.Router();
-app.use('/api/rest', restRouter);
+```js
+const beers = rest.add(require('./resources/Beer'), '/rest/beers');
 
-// Instantiate express-rested with the router
+beers.loadMap(require('./db/beers.json'));
 
-const rest = rested(restRouter);
+beers.persist(function (ids, cb) {
+	fs.writeFile('./db/beers.json', JSON.stringify(this), cb);
+});
+```
 
-// Declare a resource class
+#### Rights management
 
-const Beer = require('./resources/Beer');
-
-// Create a beers collection and define user access rights
-
-const beers = rest.add(Beer, {
+```js
+rest.add(require('./resources/Beer'), '/rest/beers', {
 	rights: {
 		read: true,     // anybody can read
 		delete: false,  // nobody can delete
@@ -85,20 +90,22 @@ const beers = rest.add(Beer, {
 		}
 	}
 });
-
-// Load up the collection
-
-beers.loadMap(require('./db/beers.json'));
-
-// Storage logic
-
-beers.persist(function (ids, cb) {
-	const str = JSON.stringify(this.getAll());
-	fs.writeFile('./db/beers.json', str, cb);
-});
 ```
 
-> For more examples, have a look at the unit tests in the /test folder
+#### Using an Express sub-router
+
+```js
+const express = require('express');
+const app = express();
+const router = new express.Router();
+const rest = require('express-rested')(router);
+
+app.use('/rest', router);
+
+// not specifying a path means the collection path will become /rest/Beer
+
+rest.add(require('./resources/Beer'));
+```
 
 
 ## Supported REST calls
@@ -141,6 +148,14 @@ perfectly fine. It's not the resource's job to ensure uniqueness. ID collisions 
 express-rested. The `createId()` method **must** store the ID it generates and returns.
 
 Required for HTTP method: POST
+
+**Notes**
+
+No other requirements exist on your resource. That also means that the ID used does not necessarily have to be stored in
+an `id` property. It may be called anything. Express-rested will never interact with your resource instances beyond:
+
+* reading the Class/constructor name (when auto-generating URL paths)
+* Calling the constructor and methods mentioned above
 
 
 ### Rest library API
