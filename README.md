@@ -15,6 +15,11 @@ when adding any logic, can be a bit of a pain. This module helps you get around 
 * Resources are always sent back to the client in JSON format.
 * In URLs, you may refer to resources with or without `.json` extension.
 
+**Other characteristics**
+
+* Zero dependencies
+* 100% unit test code coverage
+
 
 ## Installation
 
@@ -196,6 +201,10 @@ Options (all optional):
   of this resource may occur.
 * persist: a function that will be called after each modification of the collection. See the documentation on `persist`
   below for more information on the function signature.
+
+**rest.get(string className) -> Collection**
+
+Can be used to retrieve an instantiated collection by its class name (case insensitive).
 
 
 ### Resource collection API

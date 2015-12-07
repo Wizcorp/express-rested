@@ -35,6 +35,8 @@ test('Core APIs', function (t) {
 		const rest = new Rest();
 		const col = rest.add(MyResource);
 
+		t.strictEqual(rest.get('myresource'), col, 'Collection can be retrieved');
+
 		col.request(true).post({ foo: 'bar' }, function (context) {
 			t.equal(context.status, 201, 'Created');
 
@@ -50,11 +52,11 @@ test('Core APIs', function (t) {
 		const col = rest.add(MyResource);
 
 		t.throws(function () {
-			rest.add("Not a class");
+			rest.add('Not a class');
 		}, 'Resource class must be a function');
 
 		t.throws(function () {
-			col.persist("not a function");
+			col.persist('not a function');
 		}, 'Persist must be a function');
 
 		col.del('FooBar', function (error) {
