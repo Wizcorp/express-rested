@@ -9,11 +9,15 @@ class Beer {
 	}
 
 	edit(info) {
-		assert(info.name);
-		assert(info.rating);
+		assert(info);
 
-		this.name = info.name;
-		this.rating = info.rating;
+		if (info.name) {
+			this.name = info.name;
+		}
+
+		if (info.rating) {
+			this.rating = info.rating;
+		}
 	}
 
 	createId() {

@@ -115,10 +115,10 @@ rest.add(require('./resources/Beer'));
 
 ## Supported REST calls
 
-|           | GET               | POST               | PUT                             | DELETE            |
-| --------- | ----------------- | ------------------ | ------------------------------- | ----------------- |
-| /Beer     | Returns all beers | Creates a new beer | Sets the entire beer collection | Deletes all beers |
-| /Beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Deletes a beer    |
+|           | GET               | POST               | PUT                             | PATCH          | DELETE            |
+| --------- | ----------------- | ------------------ | ------------------------------- | -------------- | ----------------- |
+| /Beer     | Returns all beers | Creates a new beer | Sets the entire beer collection | Not supported  | Deletes all beers |
+| /Beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Updates a beer | Deletes a beer    |
 
 
 ## API
@@ -142,9 +142,11 @@ Required for HTTP methods: POST, PUT.
 **edit(Object info) (optional)**
 
 This enables updating of the resource value. The `info` argument is like the one in the constructor. If the data in
-`info` is not what it's supposed to be, you may throw an error to bail out.
+`info` is not what it's supposed to be, you may throw an error to bail out. To support partial updates (PATCH), please
+allow `edit()` to accept a partial object. If you don't want to accept partial objects, please throw an error when you
+detect this to be the case.
 
-Required for HTTP method: PUT
+Required for HTTP method: PUT, PATCH
 
 **createId() -> string (optional)**
 

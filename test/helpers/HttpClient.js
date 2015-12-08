@@ -75,7 +75,7 @@ class HttpClient {
 		url.method = method;
 		url.path = path;
 
-		if (method === 'PUT' || method === 'POST') {
+		if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
 			url.headers = url.headers || {};
 			url.headers['content-type'] = 'application/json';
 		}
@@ -119,6 +119,16 @@ class HttpClient {
 
 	put(t, path, data, cb) {
 		const req = request(this.url('PUT', path), function (res) {
+			respond(t, res, cb);
+		});
+
+		req.on('error', failer(t));
+		req.write(serialize(data));
+		req.end();
+	}
+
+	patch(t, path, data, cb) {
+		const req = request(this.url('PATCH', path), function (res) {
 			respond(t, res, cb);
 		});
 
