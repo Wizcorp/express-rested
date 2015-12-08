@@ -73,7 +73,7 @@ test('Methods', function (t) {
 
 		http.post(t, '/rest/beer', heineken, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
-			t.equal(res.headers.allow, 'GET, HEAD, PUT, DELETE');
+			t.equal(res.headers.allow, 'GET, HEAD, PUT, PATCH, DELETE');
 			Beer.prototype.createId = old;
 			t.end();
 		});
@@ -225,6 +225,50 @@ test('Methods', function (t) {
 			t.ok(res.headers.location, 'Location header returned');
 			t.equal(res.headers.location, '/rest/beer/' + suntory.id, 'Location header points to a beer');
 			t.deepEqual(suntory, collection.get(suntory.id), 'Suntory in collection');
+			t.end();
+		});
+	});
+
+	t.test('PATCH /rest/beer/Heineken (no data)', function (t) {
+		http.patch(t, '/rest/beer/Heineken', '', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('PATCH /rest/beer/Heineken (save failure)', function (t) {
+		collection.persist(function (ids, cb) {
+			cb(new Error('Oh noes!'));
+		});
+
+		http.patch(t, '/rest/beer/Heineken', heineken, function (data, res) {
+			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+
+			collection.unpersist();
+			t.end();
+		});
+	});
+
+	t.test('PATCH /rest/beer/FooBar', function (t) {
+		const patch = {
+			rating: 2
+		};
+
+		http.patch(t, '/rest/beer/FooBar', patch, function (data, res) {
+			t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+			t.end();
+		});
+	});
+
+	t.test('PATCH /rest/beer/Heineken', function (t) {
+		const patch = {
+			rating: 2
+		};
+
+		http.patch(t, '/rest/beer/Heineken', patch, function (data, res) {
+			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
+			heineken.rating = patch.rating;
+			t.deepEqual(collection.get('Heineken'), heineken, 'Heineken with new ranking in collection');
 			t.end();
 		});
 	});

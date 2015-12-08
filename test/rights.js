@@ -73,6 +73,13 @@ test('No rights', function (t) {
 		});
 	});
 
+	t.test('PATCH /rest/beer/Heineken', function (t) {
+		http.patch(t, '/rest/beer/Heineken', heineken, function (data, res) {
+			t.equal(res.statusCode, 404, 'HTTP status 404 (Not found)');
+			t.end();
+		});
+	});
+
 	t.test('PUT /rest/beer (update)', function (t) {
 		http.put(t, '/rest/beer', { Heineken: heineken }, function (data, res) {
 			t.equal(res.statusCode, 404, 'HTTP status 404 (Not found)');
@@ -120,7 +127,7 @@ test('No rights', function (t) {
 
 		http.get(t, '/rest/beer-no-read/Heineken', function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
-			t.equal(res.headers.allow, 'POST, PUT, DELETE', 'Allow methods conveyed');
+			t.equal(res.headers.allow, 'POST, PUT, PATCH, DELETE', 'Allow methods conveyed');
 			t.end();
 		});
 	});
@@ -137,7 +144,7 @@ test('No rights', function (t) {
 
 		http.post(t, '/rest/beer-no-create', heineken, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
-			t.equal(res.headers.allow, 'GET, HEAD, PUT, DELETE', 'Allow methods conveyed');
+			t.equal(res.headers.allow, 'GET, HEAD, PUT, PATCH, DELETE', 'Allow methods conveyed');
 			t.end();
 		});
 	});
@@ -154,7 +161,7 @@ test('No rights', function (t) {
 
 		http.put(t, '/rest/beer-no-create2/' + id, heineken, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
-			t.equal(res.headers.allow, 'GET, HEAD, PUT, DELETE', 'Allow methods conveyed');
+			t.equal(res.headers.allow, 'GET, HEAD, PUT, PATCH, DELETE', 'Allow methods conveyed');
 			t.end();
 		});
 	});
@@ -176,6 +183,23 @@ test('No rights', function (t) {
 		});
 	});
 
+	t.test('PATCH /rest/beer-no-update/Heineken (no update allowed)', function (t) {
+		rest.add(Beer, '/beer-no-update', {
+			rights: {
+				read: true,
+				create: true,
+				update: false,
+				delete: true
+			}
+		}).loadOne(id, heineken);
+
+		http.patch(t, '/rest/beer-no-update/' + id, heineken, function (data, res) {
+			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
+			t.equal(res.headers.allow, 'GET, HEAD, POST, PUT, DELETE', 'Allow methods conveyed');
+			t.end();
+		});
+	});
+
 	t.test('DELETE /rest/beer-no-delete/Heineken (no delete allowed)', function (t) {
 		rest.add(Beer, '/beer-no-delete', {
 			rights: {
@@ -188,7 +212,7 @@ test('No rights', function (t) {
 
 		http.delete(t, '/rest/beer-no-delete/' + id, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
-			t.equal(res.headers.allow, 'GET, HEAD, POST, PUT', 'Allow methods conveyed');
+			t.equal(res.headers.allow, 'GET, HEAD, POST, PUT, PATCH', 'Allow methods conveyed');
 			t.end();
 		});
 	});
