@@ -26,7 +26,9 @@ test('Core APIs', function (t) {
 		rest.add(MyResource, '/foo');
 		rest.add(MyResource, 'foo2', {
 			rights: false,
-			persist(ids, cb) { cb(); }
+			persist(ids, cb) {
+				cb();
+			}
 		});
 		t.end();
 	});

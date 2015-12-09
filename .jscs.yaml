@@ -1,0 +1,82 @@
+esnext: true
+requireCurlyBraces: ["if", "else", "for", "while", "do", "try", "catch", "finally"]
+requireSpaceBeforeKeywords: ["if", "else", "for", "while", "do", "switch", "return", "try", "catch", "finally"]
+requireSpaceAfterKeywords: ["if", "else", "for", "while", "do", "switch", "return", "try", "catch", "finally", "typeof"]
+requireSpaceBeforeBlockStatements: true
+disallowSpaceBeforeComma: true
+requireSpaceAfterComma: true
+requireParenthesesAroundIIFE: true
+requireSpacesInConditionalExpression: true
+requireSpacesInAnonymousFunctionExpression:
+  allExcept: [shorthand]
+  beforeOpeningRoundBrace: true
+  beforeOpeningCurlyBrace: true
+requireSpacesInNamedFunctionExpression:
+  beforeOpeningCurlyBrace: true
+disallowNewlineBeforeBlockStatements: true
+requireBlocksOnNewline: true
+disallowPaddingNewlinesInBlocks: true
+disallowEmptyBlocks: true
+disallowIdenticalDestructuringNames: true
+disallowNestedTernaries: true
+requireSpaceBetweenArguments: true
+requireSpacesInForStatement: true
+requireSpacesInsideObjectBrackets: all
+disallowSpacesInsideArrayBrackets: true
+disallowSpacesInsideParentheses: true
+disallowQuotedKeysInObjects: true
+requireSemicolons: true
+disallowSpaceAfterObjectKeys: true
+requireCommaBeforeLineBreak: true
+requireOperatorBeforeLineBreak: true
+requireSpaceBeforeObjectValues: true
+disallowSpaceAfterPrefixUnaryOperators: true
+disallowSpaceBeforePostfixUnaryOperators: true
+disallowSpaceBeforeSemicolon: true
+disallowSpaceBeforeBinaryOperators: [","]
+requireSpaceBeforeBinaryOperators: ["+", "-", "/", "*", "=", "==", "===", "!=", "!=="]
+requireSpaceAfterBinaryOperators: ["+", "-", "/", "*", "=", "==", "===", "!=", "!=="]
+requireCamelCaseOrUpperCaseIdentifiers: true
+disallowKeywords: ["with"]
+disallowMultipleLineStrings: true
+validateLineBreaks: LF
+validateQuoteMarks:
+  mark: "'"
+  escape: false
+validateParameterSeparator: ", "
+validateIndentation: "\t"
+disallowMixedSpacesAndTabs: smart
+disallowTrailingWhitespace: true
+disallowTrailingComma: true
+disallowSpacesInCallExpression: true
+disallowKeywordsOnNewLine: ["else", "catch", "finally"]
+maximumLineLength:
+  value: 120
+  allowUrlComments: true
+requireCapitalizedConstructors: true
+safeContextKeyword: ["that"]
+requireDotNotation: except_snake_case
+requireFunctionDeclarations: true
+disallowYodaConditions: true
+requireEarlyReturn: true
+requireSpaceAfterLineComment: true
+requireMatchingFunctionName: true
+requireLineFeedAtFileEnd: true
+jsDoc:
+  checkAnnotations: jsdoc3
+  checkParamExistence: true
+  checkParamNames: true
+  requireParamTypes: true
+  checkRedundantParams: true
+  checkReturnTypes: true
+  checkRedundantReturns: true
+  requireReturnTypes: true
+  checkTypes: true
+  checkRedundantAccess: true
+  leadingUnderscoreAccess: true
+  enforceExistence: false
+  requireHyphenBeforeDescription: true
+  requireNewlineAfterDescription: true
+  # requireDescriptionCompleteSentence: false  # using false/null inside the jsDoc block does not always work yet
+  requireParamDescription: true
+  requireReturnDescription: true

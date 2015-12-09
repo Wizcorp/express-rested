@@ -30,7 +30,7 @@ test('Methods', function (t) {
 			http = _http;
 			t.end();
 		});
-	})
+	});
 
 	t.test('POST /rest/beer (Heineken)', function (t) {
 		http.post(t, '/rest/beer', heineken, function (data, res) {
@@ -56,5 +56,5 @@ test('Methods', function (t) {
 		server.close(function () {
 			t.end();
 		});
-	})
+	});
 });

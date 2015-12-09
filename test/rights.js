@@ -27,7 +27,7 @@ test('No rights', function (t) {
 			Beer = collection.Class;
 			t.end();
 		});
-	})
+	});
 
 	const heineken = {
 		name: 'Heineken',
@@ -221,5 +221,5 @@ test('No rights', function (t) {
 		server.close(function () {
 			t.end();
 		});
-	})
+	});
 });

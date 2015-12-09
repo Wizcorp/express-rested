@@ -42,22 +42,22 @@ test('Methods', function (t) {
 	};
 
 	const all = {
-		'Heineken': heineken,
-		'SuntoryPremium': suntory,
-		'Rochefort': rochefort,
-		'DeMolen': demolen
+		Heineken: heineken,
+		SuntoryPremium: suntory,
+		Rochefort: rochefort,
+		DeMolen: demolen
 	};
 
 	const allButSuntory = {
-		'Heineken': heineken,
-		'Rochefort': rochefort,
-		'DeMolen': demolen
+		Heineken: heineken,
+		Rochefort: rochefort,
+		DeMolen: demolen
 	};
 
 	const allButDeMolen = {
-		'Heineken': heineken,
-		'SuntoryPremium': suntory,
-		'Rochefort': rochefort
+		Heineken: heineken,
+		SuntoryPremium: suntory,
+		Rochefort: rochefort
 	};
 
 	t.test('POST /rest/beer (no data)', function (t) {
@@ -394,5 +394,5 @@ test('Methods', function (t) {
 		server.close(function () {
 			t.end();
 		});
-	})
+	});
 });
