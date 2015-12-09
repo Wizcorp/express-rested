@@ -177,9 +177,12 @@ This imports the library itself.
 
 Instantiates a rest object on which you can create collections for resources.
 
-Make sure that the express router you want to use has the JSON body parser enabled. Else we won't be able to receive
-data. Also, ensure that it listens for incoming requests on a reasonable base URL (such as `/rest`). The URLs to our
-collections will sit on top of this. The router is optional, but as you can imagine it hardly makes sense to use this
+You may pass an Express router (an Express app, or sub-router) so that routes to the collections you add will
+automatically be registered on it. If the router already uses the body-parser middleware to parse JSON, express-rested
+will use it. Otherwise it will take care of JSON parsing by itself.
+
+It may make sense to use a sub-router that listens for incoming requests on a URL such as `/rest`. The URLs to our
+collections will sit on top of this. While the router is optional, you can imagine it hardly makes sense to use this
 library without having it register HTTP routes.
 
 **rest.add(constructor Class[, string path, Object options]) -> Collection**
