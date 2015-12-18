@@ -24,6 +24,24 @@ class Beer {
 		this.id = this.name;
 		return this.id;
 	}
+
+	// special extensions
+
+	getTxt(req, res) {
+		res.status(200).send('GET .txt');
+	}
+
+	putTxt(req, res) {
+		res.status(200).send('PUT .txt');
+	}
+
+	patchTxt(req, res) {
+		res.status(200).send('PATCH .txt');
+	}
+
+	deleteTxt(req, res) {
+		res.status(200).send('DELETE .txt');
+	}
 }
 
 module.exports = Beer;

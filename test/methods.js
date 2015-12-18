@@ -92,18 +92,35 @@ test('Methods', function (t) {
 		});
 	});
 
-	t.test('POST /rest/beer (bad content-type)', function (t) {
+	t.test('POST /rest/beer (text/plain)', function (t) {
 		http.overrideHeader('content-type', 'text/plain');
 
 		http.post(t, '/rest/beer', heineken, function (data, res) {
 			http.overrideHeader('content-type');
-			t.equal(res.statusCode, 415, 'HTTP status 415 (Unsupported Media Type)');
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('POST /rest/beer (unknown media type)', function (t) {
+		http.overrideHeader('content-type', 'foo/bar');
+
+		http.post(t, '/rest/beer', heineken, function (data, res) {
+			http.overrideHeader('content-type');
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
 			t.end();
 		});
 	});
 
 	t.test('POST /rest/beer (bad content)', function (t) {
 		http.post(t, '/rest/beer', new Buffer('foobar'), function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('POST /rest/beer (no content)', function (t) {
+		http.post(t, '/rest/beer', new Buffer(0), function (data, res) {
 			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
 			t.end();
 		});

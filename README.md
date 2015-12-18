@@ -14,6 +14,7 @@ when adding any logic, can be a bit of a pain. This module helps you get around 
 * The resource classes you define can be used in browser as well as in Node.js, so you can write universal JavaScript.
 * Resources are always sent back to the client in JSON format.
 * In URLs, you may refer to resources with or without `.json` extension.
+* You can add support for custom file extensions and behavior in your resources.
 
 **Other characteristics**
 
@@ -112,6 +113,47 @@ app.use('/rest', router);
 rest.add(require('./resources/Beer'));
 ```
 
+#### Custom file extensions
+
+`resources/Beer.js`
+
+```js
+class Beer() {
+	constructor(id, info) {
+		this.id = id;
+		this.edit(info);
+	}
+
+	createId() {
+		this.id = this.name;
+		return this.id;
+	}
+
+	edit(info) {
+		this.name = info.name;
+		this.rating = info.rating;
+	}
+
+	getJpeg(req, res) {
+		res.sendFile('/beer-images/' + this.id + '.jpg');
+	}
+
+	putJpeg(req, res) {
+		const buffs = [];
+		req.on('data', function (buff) { buffs.push(buff); });
+		req.on('end', () => {
+			require('fs').writeFileSync('/beer-images/' + this.id + '.jpg', Buffer.concat(buffs));
+			res.sendStatus(200);
+		});
+	}
+
+	deleteJpeg(req, res) {
+		require('fs').unlinkSync('/beer-images/' + this.id + '.jpg');
+		res.sendStatus(200);
+	}
+}
+```
+
 
 ## Supported REST calls
 
@@ -155,6 +197,29 @@ perfectly fine. It's not the resource's job to ensure uniqueness. ID collisions 
 express-rested. The `createId()` method **must** store the ID it generates and returns.
 
 Required for HTTP method: POST
+
+**getExt(express.Request req, express.Response res) (optional)**
+
+You may replace "Ext" in this method name by any file extension you wish to expose a `GET` endpoint for (eg: `getTxt`).
+You will receive the `req` and `res` objects and will have full control over how to parse the request and respond to it.
+
+**putExt(express.Request req, express.Response res) (optional)**
+
+You may replace "Ext" in this method name by any file extension you wish to expose a `PUT` endpoint for (eg: `putTxt`).
+You will receive the `req` and `res` objects and will have full control over how to parse the request and respond to it.
+
+**patchExt(express.Request req, express.Response res) (optional)**
+
+You may replace "Ext" in this method name by any file extension you wish to expose a `PATCH` endpoint for (eg:
+`patchTxt`). You will receive the `req` and `res` objects and will have full control over how to parse the request and
+respond to it.
+
+**deleteExt(express.Request req, express.Response res) (optional)**
+
+You may replace "Ext" in this method name by any file extension you wish to expose a `DELETE` endpoint for (eg:
+`deleteTxt`). You will receive the `req` and `res` objects and will have full control over how to parse the request and
+respond to it.
+
 
 **Notes**
 
