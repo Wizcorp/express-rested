@@ -42,7 +42,7 @@ test('Core APIs', function (t) {
 		col.request(true).post({ foo: 'bar' }, function (context) {
 			t.equal(context.status, 201, 'Created');
 
-			col.request(false).get('foo', function (context) {
+			col.request(false).get('foo', null, function (context) {
 				t.equal(context.status, 404, 'Not Found');
 				t.end();
 			});
