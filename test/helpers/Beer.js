@@ -25,6 +25,10 @@ class Beer {
 		return this.id;
 	}
 
+	matches(query) {
+		return query.name && this.name.indexOf(query.name) !== -1;
+	}
+
 	// special extensions
 
 	getTxt(req, res) {

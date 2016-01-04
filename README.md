@@ -15,6 +15,7 @@ when adding any logic, can be a bit of a pain. This module helps you get around 
 * Resources are always sent back to the client in JSON format.
 * In URLs, you may refer to resources with or without `.json` extension.
 * You can add support for custom file extensions and behavior in your resources.
+* You can implement search by adding a single function to your resource class.
 
 **Other characteristics**
 
@@ -154,6 +155,32 @@ class Beer() {
 }
 ```
 
+#### Search
+
+`resources/Beer.js`
+
+```js
+class Beer() {
+	constructor(id, info) {
+		this.id = id;
+		this.edit(info);
+	}
+
+	createId() {
+		this.id = this.name;
+		return this.id;
+	}
+
+	edit(info) {
+		this.name = info.name;
+		this.rating = info.rating;
+	}
+
+	matches(obj) {
+		return this.name.indexOf(obj.name) !== -1;
+	}
+}
+```
 
 ## Supported REST calls
 
@@ -197,6 +224,14 @@ perfectly fine. It's not the resource's job to ensure uniqueness. ID collisions 
 express-rested. The `createId()` method **must** store the ID it generates and returns.
 
 Required for HTTP method: POST
+
+**matches(Object obj) -> boolean (optional)**
+
+Implement this function to allow filtering to happen on your resource collection. When the query string in a URL
+(eg: `?name=bob`) is passed, this function will be called and the entire parsed query object will be passed. If it does
+not return `true`, the resource will not end up in the final collection that is being retrieved.
+
+Required for HTTP method: GET with query string
 
 **getExt(express.Request req, express.Response res) (optional)**
 
