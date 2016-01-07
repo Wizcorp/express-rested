@@ -48,6 +48,11 @@ test('Methods', function (t) {
 		DeMolen: demolen
 	};
 
+	const enMatchers = {
+		DeMolen: demolen,
+		Heineken: heineken
+	};
+
 	const allButSuntory = {
 		Heineken: heineken,
 		Rochefort: rochefort,
@@ -316,6 +321,14 @@ test('Methods', function (t) {
 		http.put(t, '/rest/beer', all, function (data, res) {
 			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
 			t.deepEqual(collection.getMap(), all, 'Replaced entire collection');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?name=en (search)', function (t) {
+		http.get(t, '/rest/beer?name=en', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, enMatchers, 'Heineken and De Molen returned');
 			t.end();
 		});
 	});
