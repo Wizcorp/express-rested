@@ -1,5 +1,9 @@
 # express-rested
 
+[![Build Status](https://travis-ci.org/Wizcorp/express-rested.svg?branch=master)](https://travis-ci.org/Wizcorp/express-rested)
+[![Coverage Status](https://coveralls.io/repos/Wizcorp/express-rested/badge.svg?branch=master&service=github)](https://coveralls.io/github/Wizcorp/express-rested?branch=master)
+
+
 REST is a great way to create an HTTP API to manage resources. It's however a poor API to do rights management on top
 on. Rights management is often based on CRUD (Create, Read, Update, Delete). A REST PUT operation however can mean
 either create or update, depending on the resource already existing or not. The REST rules are simple to follow, but
