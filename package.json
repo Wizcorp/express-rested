@@ -34,8 +34,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Wizcorp/express-rested.git"
-  },
-  "dependencies": {
-    "mime-types": "^2.1.8"
   }
 }
