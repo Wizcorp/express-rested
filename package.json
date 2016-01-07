@@ -1,6 +1,6 @@
 {
   "name": "express-rested",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Manage resources with REST through Express",
   "main": "index.js",
   "directories": {
