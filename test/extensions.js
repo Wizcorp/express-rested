@@ -100,6 +100,24 @@ test('Extensions', function (t) {
 		t.end();
 	});
 
+	t.test('Overridden JSON handling', function (t) {
+		const body = { hello: 'world' };
+		collection.loadOne('Heineken', heineken);
+		const obj = collection.get('Heineken');
+
+		obj.getJson = function (req, res) {
+			res.writeHead(200, { 'content-type': 'application/json' });
+			res.end(JSON.stringify(body));
+		};
+
+		http.get(t, '/rest/beer/Heineken', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, body, 'Response body as expected');
+			delete obj.getJson;
+			t.end();
+		});
+	});
+
 	t.test('Close REST server', function (t) {
 		server.close(function () {
 			t.end();
