@@ -368,7 +368,7 @@ Empties the entire collection. Triggers the `persist` callback.
 
 Registers a function that will be called on any change to the collection, and is passed an array of IDs that were
 affected. If you pass a callback, you will have a chance to do asynchronous operations and return an error on failure.
-This error will find its way to the client as an Internal Service Error (500). If you don't pass a callback, you may
+This error will find its way to the client as an Internal Server Error (500). If you don't pass a callback, you may
 still throw an exception to achieve the same.
 
 
