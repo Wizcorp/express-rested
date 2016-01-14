@@ -217,7 +217,7 @@ Required for HTTP methods: POST, PUT.
 This enables updating of the resource value. The `info` argument is like the one in the constructor. If the data in
 `info` is not what it's supposed to be, you may throw an error to bail out. To support partial updates (PATCH), please
 allow `edit()` to accept a partial object. If you don't want to accept partial objects, please throw an error when you
-detect this to be the case.
+detect this to be the case. The `edit` method should never write an `id`, as that is the job of the constructor and the optional `createId` method (see below).
 
 Required for HTTP method: PUT, PATCH
 
