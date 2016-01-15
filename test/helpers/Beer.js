@@ -46,6 +46,20 @@ class Beer {
 	deleteTxt(req, res) {
 		res.status(200).send('DELETE .txt');
 	}
+
+	static getTxt(req, res, beers) {
+		// returns newline separated beers, sorted by name
+
+		beers.sort(function (a, b) {
+			return a.name.localeCompare(b.name);
+		});
+
+		beers = beers.map(function (beer) {
+			return JSON.stringify(beer);
+		});
+
+		res.status(200).send(beers.join('\n'));
+	}
 }
 
 module.exports = Beer;

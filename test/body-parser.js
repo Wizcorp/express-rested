@@ -5,7 +5,7 @@ const createServer = require('./helpers/server');
 const basename = require('path').basename;
 
 
-test('Methods', function (t) {
+test('Body parser', function (t) {
 	const options = {
 		autoParse: true,
 		rights: {

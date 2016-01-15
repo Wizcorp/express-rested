@@ -39,10 +39,10 @@ test('Core APIs', function (t) {
 
 		t.strictEqual(rest.get('myresource'), col, 'Collection can be retrieved');
 
-		col.request(true).post({ foo: 'bar' }, function (context) {
+		col.request(true).post({ foo: 'bar' }, null, function (context) {
 			t.equal(context.status, 201, 'Created');
 
-			col.request(false).get('foo', null, function (context) {
+			col.request(false).get('foo', null, null, function (context) {
 				t.equal(context.status, 404, 'Not Found');
 				t.end();
 			});
