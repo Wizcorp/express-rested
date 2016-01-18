@@ -143,7 +143,7 @@ test('Methods', function (t) {
 			// now retrieve it
 			http.get(t, res.headers.location, function (data, res) {
 				t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
-				t.deepEqual(data, heineken, 'Heineken retrieved through Location header');
+				t.deepEqual(data, heineken, 'Heineken retrieved by following Location header');
 				t.end();
 			});
 		});

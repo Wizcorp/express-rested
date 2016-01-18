@@ -156,6 +156,14 @@ class Beer() {
 		require('fs').unlinkSync('/beer-images/' + this.id + '.jpg');
 		res.sendStatus(200);
 	}
+
+	static getJson(req, res, beersArray) {
+		beersArray.sort((a, b) => {
+			return a.name.localeCompare(b.name);
+		});
+
+		res.status(200).send(beersArray);
+	}
 }
 ```
 
@@ -236,6 +244,16 @@ Implement this function to allow filtering to happen on your resource collection
 not return `true`, the resource will not end up in the final collection that is being retrieved.
 
 Required for HTTP method: GET with query string
+
+**static getExt(express.Request req, express.Response res, Object[] resources)**
+
+You may replace "Ext" in this method name by any file extension you wish to expose a `GET` endpoint for (eg: `getTxt`).
+You will receive the `req` and `res` objects and will have full control over how to parse the request and respond to it.
+The third argument you receive is an array containing all the resources in the collection. If a search query was passed,
+the `matches()` method will have run on each resource, and non-matching resources will not be in this array.
+Implementing this method can be used not just for alternative extensions, but also if you want to change the output of
+how a collection is returned in JSON, for example by simply responding directly with the array (by default a collection
+is returned as a key/value lookup object).
 
 **getExt(express.Request req, express.Response res) (optional)**
 
