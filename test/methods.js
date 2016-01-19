@@ -303,6 +303,14 @@ test('Methods', function (t) {
 		});
 	});
 
+	t.test('GET /rest/beer/ (trailing slash)', function (t) {
+		http.get(t, '/rest/beer/', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, allButDeMolen, 'All beers but De Molen returned');
+			t.end();
+		});
+	});
+
 	t.test('PUT /rest/beer (no data for collection)', function (t) {
 		http.put(t, '/rest/beer', '', function (data, res) {
 			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
