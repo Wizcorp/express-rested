@@ -37,7 +37,7 @@ test('No rights', function (t) {
 	const id = 'Heineken';
 
 	t.test('Injecting Heineken into collection through the backdoor', function (t) {
-		const resource = collection.instantiate(id, heineken);
+		const resource = new Beer(id, heineken);
 		collection.set(id, resource, function (error) {
 			t.ifError(error, 'No error');
 			t.ok(collection.has(id), 'Heineken in collection');
