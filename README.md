@@ -67,9 +67,12 @@ module.exports = Beer;
 
 ```js
 const app = require('express')();
-const rest = require('express-rested')(app);
+const rested = require('express-rested');
 
-rest.add(require('./resources/Beer'), '/rest/beers');
+const route = rested.route(app);
+const beers = rested.createCollection(require('./resources/Beer'));
+
+route(beers, '/rest/beers', { rights: true });
 
 app.listen(3000);
 ```
@@ -77,8 +80,6 @@ app.listen(3000);
 #### Persisting data
 
 ```js
-const beers = rest.add(require('./resources/Beer'), '/rest/beers');
-
 beers.loadMap(require('./db/beers.json'));
 
 beers.persist(function (ids, cb) {
@@ -89,7 +90,7 @@ beers.persist(function (ids, cb) {
 #### Rights management
 
 ```js
-rest.add(require('./resources/Beer'), '/rest/beers', {
+route(beers, '/rest/beers', {
 	rights: {
 		read: true,     // anybody can read
 		delete: false,  // nobody can delete
@@ -107,15 +108,17 @@ rest.add(require('./resources/Beer'), '/rest/beers', {
 
 ```js
 const express = require('express');
+const rested = require('express-rested');
+
 const app = express();
 const router = new express.Router();
-const rest = require('express-rested')(router);
+const route = rested.route(router);
 
 app.use('/rest', router);
 
 // not specifying a path means the collection path will become /rest/Beer
 
-rest.add(require('./resources/Beer'));
+route(beers);
 ```
 
 #### Custom file extensions
@@ -289,52 +292,72 @@ an `id` property. It may be called anything. Express-rested will never interact 
 
 ### Rest library API
 
-Importing the library:
-
 **const rested = require('express-rested');**
 
-This imports the library itself.
+This imports the library.
 
-**const rest = rested([express.Router restRouter]);**
+#### Managing collections
 
-Instantiates a rest object on which you can create collections for resources.
+**rested.createCollection(constructor Class[, Object options]) -> Collection**
 
-You may pass an Express router (an Express app, or sub-router) so that routes to the collections you add will
+Creates and returns a collection for objects of type `Class`.
+
+Options:
+
+* *persist: Function* A function that will be called after each modification of the collection. See the documentation
+  on the `collection.persist` method below for more information on the function signature and usage.
+
+**rested.getCollection(string name) -> Collection|undefined**
+
+Returns the collection with the given class name (case insensitive), or `undefined` if it doesn't exist.
+
+**rested.delCollection(string name)**
+
+Deletes the collection with the given class name (case insensitive) from memory. It does destroy resources, nor will it
+call the `persist` function for removal. The method is simply there to let express-rested forget about a collection.
+Please do note that if HTTP routes have already been assigned for this collection, calling this function will have no
+effect, other than that `getCollection(name)` will no longer return the collection.
+
+#### Registering routes for collections
+
+**rested.route(express.Router restRouter) -> Function**
+
+Instantiates a route function through which you can expose collections on your HTTP server.
+
+You must pass an Express router (an Express app, or sub-router) so that routes to the collections you add will
 automatically be registered on it. If the router already uses the body-parser middleware to parse JSON, express-rested
 will use it. Otherwise it will take care of JSON parsing by itself.
 
 It may make sense to use a sub-router that listens for incoming requests on a URL such as `/rest`. The URLs to our
-collections will sit on top of this. While the router is optional, you can imagine it hardly makes sense to use this
-library without having it register HTTP routes.
+collections will sit on top of this.
 
-**rest.add(constructor Class[, string path, Object options]) -> Collection**
+The function you get back has the following signature:
 
-Creates and returns a collection for objects of type `Class`. If you have set up an Express Router, all routes to this
-collection will automatically be registered on it. The `path` you provide will be the sub-path on which all routes
-are registered. For example the path `/beer` will sit on top of the base path (eg: `/rest`) and will therefore respond
-to HTTP requests to the full route that is `/rest/beer`. If you do not provide a path, the name of the class you provide
-will be used (and prefixed with `/`, eg.: `'/Beer'`).
+**route(Collection collection[, string path, Object options])**
+
+This will register all routes to this collection. The `path` you can provide will be the sub-path on which all routes
+are registered. For example the path `/beer` will sit on top of the base path (eg: `/rest`) of the router and will
+therefore respond to HTTP requests to the full route that is `/rest/beer`. If you do not provide a path, the name of the
+class you provide will be used (and prefixed with `/`, eg.: `'/Beer'`).
 
 Options (all optional):
 
-* rights: an object, boolean or function that will be applied to all CRUD operations (read on for the applied logic).
-* rights.create: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not creation
-  of this resource may occur.
-* rights.read: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not reading
-  of this resource may occur.
-* rights.update: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not updating
-  of this resource may occur.
-* rights.delete: a boolean or a function(req, res, resource) that returns a boolean indicating whether or not deletion
-  of this resource may occur.
-* persist: a function that will be called after each modification of the collection. See the documentation on `persist`
-  below for more information on the function signature.
+* *rights: object, boolean or function(req, res, resource)* Is applied to all CRUD operations (read on for the logic).
+* *rights.create: boolean or function(req, res, resource)* Should be or return a boolean indicating whether or not
+  creating this resource is allowed.
+* *rights.read: boolean or function(req, res, resource)* Should be or return a boolean indicating whether or not reading
+  this resource is allowed.
+* *rights.update: boolean or function(req, res, resource)* Should be or return a boolean indicating whether or not
+  updating this resource is allowed.
+* *rights.delete: boolean or function(req, res, resource)* Should be or return a boolean indicating whether or not
+  deleting this resource may occur.
 
-**rest.get(string className) -> Collection**
+By default, the `rights` option is `false` (secure by default). This means that exposing a collection to Express
+requires you to set up the rights for it using these options.
 
-Can be used to retrieve an instantiated collection by its class name (case insensitive).
+#### Resource collection API
 
-
-### Resource collection API
+If you want to manually influence a collection's resources, you can use the following methods.
 
 **collection.loadMap(Object map)**
 
@@ -345,11 +368,11 @@ Fills up the collection with all objects in the map. The key in the map will be 
 
 This instantiates a resource object from `info` and loads it into the collection.
 
-**collection.has(id) -> boolean**
+**collection.has(string id) -> boolean**
 
 Returns `true` if the collection has a resource for the given `id`, `false` otherwise.
 
-**collection.get(id) -> Class|undefined**
+**collection.get(string id) -> Class|undefined**
 
 Returns the resource with the given `id` it it exists, `undefined` otherwise.
 
@@ -385,9 +408,12 @@ Empties the entire collection. Triggers the `persist` callback.
 **collection.persist(function (string ids[], [Function cb]) { })**
 
 Registers a function that will be called on any change to the collection, and is passed an array of IDs that were
-affected. If you pass a callback, you will have a chance to do asynchronous operations and return an error on failure.
-This error will find its way to the client as an Internal Server Error (500). If you don't pass a callback, you may
-still throw an exception to achieve the same.
+affected. You can use this to write changes to a database. If you pass a callback, you will have a chance to do
+asynchronous operations and return an error on failure. If you don't pass a callback, you may throw an exception to
+achieve the same.
+
+Errors find their way to the HTTP client as an Internal Server Error (500). Error also have the automatic effect that
+changes made in the collection will be automatically rolled back.
 
 
 ## License
