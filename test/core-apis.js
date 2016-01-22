@@ -2,7 +2,7 @@
 
 const test = require('tape');
 const express = require('express');
-const Rest = require('../lib/Rest');
+const rested = require('../lib');
 
 
 class MyResource {
@@ -19,25 +19,35 @@ class MyResource {
 
 
 test('Core APIs', function (t) {
+	t.test('Collection instances', function (t) {
+		const col = rested.createCollection(MyResource);
+		t.strictEqual(rested.getCollection('myresource'), col);
+		rested.delCollection('myresource');
+		t.end();
+	});
+
 	t.test('Rest instance', function (t) {
-		const rest = new Rest(express());
-		rest.add(MyResource);
-		rest.add(MyResource, { rights: true });
-		rest.add(MyResource, '/foo');
-		rest.add(MyResource, 'foo2', {
-			rights: false,
+		t.throws(function () {
+			rested.route();
+		}, 'Argument to rested.route() must be a router');
+
+		const router = new express.Router();
+		const route = rested.route(router);
+		const col = rested.createCollection(MyResource, {
 			persist(ids, cb) {
 				cb();
 			}
 		});
+
+		route(col, { rights: true });
+		route(col, 'myresource', { rights: true });
+		route(col, '/myresource', { rights: true });
+
 		t.end();
 	});
 
 	t.test('Collection requests', function (t) {
-		const rest = new Rest();
-		const col = rest.add(MyResource);
-
-		t.strictEqual(rest.get('myresource'), col, 'Collection can be retrieved');
+		const col = rested.createCollection(MyResource);
 
 		col.request(true).post({ foo: 'bar' }, null, function (context) {
 			t.equal(context.status, 201, 'Created');
@@ -50,12 +60,11 @@ test('Core APIs', function (t) {
 	});
 
 	t.test('Collection edge behaviors', function (t) {
-		const rest = new Rest();
-		const col = rest.add(MyResource);
-
 		t.throws(function () {
-			rest.add('Not a class');
+			rested.createCollection('Not a class');
 		}, 'Resource class must be a function');
+
+		const col = rested.createCollection(MyResource);
 
 		t.throws(function () {
 			col.persist('not a function');
@@ -68,8 +77,7 @@ test('Core APIs', function (t) {
 	});
 
 	t.test('Collection undos', function (t) {
-		const rest = new Rest();
-		const col = rest.add(MyResource);
+		const col = rested.createCollection(MyResource);
 
 		col.persist(function () {
 			throw new Error('Save failure');
@@ -94,8 +102,7 @@ test('Core APIs', function (t) {
 	});
 
 	t.test('Collection JSON', function (t) {
-		const rest = new Rest();
-		const col = rest.add(MyResource);
+		const col = rested.createCollection(MyResource);
 
 		col.set('abc', new MyResource('abc', {}));
 
