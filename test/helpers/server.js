@@ -10,7 +10,7 @@ module.exports = function (t, options, cb) {
 	const path = '/beer';
 	const app = express();
 	const router = new express.Router();
-	const rest = require('../../')(router);
+	const rested = require('../..');
 
 	if (options.autoParse) {
 		app.use(bodyParser.json());
@@ -18,7 +18,10 @@ module.exports = function (t, options, cb) {
 
 	app.use('/rest', router);
 
-	const collection = rest.add(Beer, path, options);
+	const route = rested.route(router);
+	const collection = rested.createCollection(Beer);
+
+	route(collection, path, options);
 
 	const server = http.createServer(app);
 
@@ -29,6 +32,8 @@ module.exports = function (t, options, cb) {
 			return;
 		}
 
-		cb(server, collection, new HttpClient('http://localhost:' + server.address().port + '/rest'), rest);
+		const client = new HttpClient('http://localhost:' + server.address().port + '/rest');
+
+		cb(server, collection, client, route);
 	});
 };

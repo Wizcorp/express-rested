@@ -16,14 +16,14 @@ test('No rights', function (t) {
 		}
 	};
 
-	let server, collection, http, rest, Beer;
+	let server, collection, http, route, Beer;
 
 	t.test('Start REST server (without body parser)', function (t) {
-		createServer(t, options, function (_server, _collection, _http, _rest) {
+		createServer(t, options, function (_server, _collection, _http, _route) {
 			server = _server;
 			collection = _collection;
 			http = _http;
-			rest = _rest;
+			route = _route;
 			Beer = collection.Class;
 			t.end();
 		});
@@ -116,14 +116,16 @@ test('No rights', function (t) {
 	});
 
 	t.test('GET /rest/beer-no-read/Heineken (no read allowed)', function (t) {
-		rest.add(Beer, '/beer-no-read', {
+		route(collection, '/beer-no-read', {
 			rights: {
 				read: false,
 				create: true,
 				update: true,
 				delete: true
 			}
-		}).loadOne(id, heineken);
+		});
+
+		collection.loadOne(id, heineken);
 
 		http.get(t, '/rest/beer-no-read/Heineken', function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
@@ -133,7 +135,9 @@ test('No rights', function (t) {
 	});
 
 	t.test('POST /rest/beer-no-create (no create allowed)', function (t) {
-		rest.add(Beer, '/beer-no-create', {
+		collection.del(id);
+
+		route(collection, '/beer-no-create', {
 			rights: {
 				read: true,
 				create: false,
@@ -150,7 +154,9 @@ test('No rights', function (t) {
 	});
 
 	t.test('PUT /rest/beer-no-create2/Heineken (no create allowed)', function (t) {
-		rest.add(Beer, '/beer-no-create2', {
+		collection.del(id);
+
+		route(collection, '/beer-no-create2', {
 			rights: {
 				read: true,
 				create: false,
@@ -167,14 +173,16 @@ test('No rights', function (t) {
 	});
 
 	t.test('PUT /rest/beer-no-update/Heineken (no update allowed)', function (t) {
-		rest.add(Beer, '/beer-no-update', {
+		route(collection, '/beer-no-update', {
 			rights: {
 				read: true,
 				create: true,
 				update: false,
 				delete: true
 			}
-		}).loadOne(id, heineken);
+		});
+
+		collection.loadOne(id, heineken);
 
 		http.put(t, '/rest/beer-no-update/' + id, heineken, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
@@ -184,14 +192,16 @@ test('No rights', function (t) {
 	});
 
 	t.test('PATCH /rest/beer-no-update/Heineken (no update allowed)', function (t) {
-		rest.add(Beer, '/beer-no-update', {
+		route(collection, '/beer-no-update', {
 			rights: {
 				read: true,
 				create: true,
 				update: false,
 				delete: true
 			}
-		}).loadOne(id, heineken);
+		});
+
+		collection.loadOne(id, heineken);
 
 		http.patch(t, '/rest/beer-no-update/' + id, heineken, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
@@ -201,14 +211,16 @@ test('No rights', function (t) {
 	});
 
 	t.test('DELETE /rest/beer-no-delete/Heineken (no delete allowed)', function (t) {
-		rest.add(Beer, '/beer-no-delete', {
+		route(collection, '/beer-no-delete', {
 			rights: {
 				read: true,
 				create: true,
 				update: true,
 				delete: false
 			}
-		}).loadOne(id, heineken);
+		});
+
+		collection.loadOne(id, heineken);
 
 		http.delete(t, '/rest/beer-no-delete/' + id, function (data, res) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
