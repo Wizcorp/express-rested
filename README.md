@@ -401,7 +401,7 @@ Returns `true` if the collection has a resource for the given `id`, `false` othe
 
 **collection.get(string id) -> Class|undefined**
 
-Returns the resource with the given `id` it it exists, `undefined` otherwise.
+Returns the resource with the given `id` if it exists, `undefined` otherwise.
 
 **collection.getIds() -> string[]**
 
