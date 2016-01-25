@@ -34,6 +34,14 @@ npm install --save express-rested
 ```
 
 
+## Supported REST calls
+
+|           | GET               | POST               | PUT                             | PATCH          | DELETE            |
+| --------- | ----------------- | ------------------ | ------------------------------- | -------------- | ----------------- |
+| /Beer     | Returns all beers | Creates a new beer | Sets the entire beer collection | Not supported  | Deletes all beers |
+| /Beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Updates a beer | Deletes a beer    |
+
+
 ## Usage
 
 ### Given a resource "Beer"
@@ -42,20 +50,20 @@ npm install --save express-rested
 
 ```js
 class Beer() {
-	constructor(id, info) {
-		this.id = id;
-		this.edit(info);
-	}
+  constructor(id, info) {
+    this.id = id;
+    this.edit(info);
+  }
 
-	createId() {
-		this.id = this.name;
-		return this.id;
-	}
+  createId() {
+    this.id = this.name;
+    return this.id;
+  }
 
-	edit(info) {
-		this.name = info.name;
-		this.rating = info.rating;
-	}
+  edit(info) {
+    this.name = info.name;
+    this.rating = info.rating;
+  }
 }
 
 module.exports = Beer;
@@ -83,7 +91,7 @@ app.listen(3000);
 beers.loadMap(require('./db/beers.json'));
 
 beers.persist(function (ids, cb) {
-	fs.writeFile('./db/beers.json', JSON.stringify(this), cb);
+  fs.writeFile('./db/beers.json', JSON.stringify(this), cb);
 });
 ```
 
@@ -91,16 +99,16 @@ beers.persist(function (ids, cb) {
 
 ```js
 route(beers, '/rest/beers', {
-	rights: {
-		read: true,     // anybody can read
-		delete: false,  // nobody can delete
-		create: function (req, res, resource) {
-			return res.locals.isAdmin;  // admins can create
-		},
-		update: function (req, res, resource) {
-			return res.locals.isAdmin;  // admins can update
-		}
-	}
+  rights: {
+    read: true,     // anybody can read
+    delete: false,  // nobody can delete
+    create: function (req, res, resource) {
+      return res.locals.isAdmin;  // admins can create
+    },
+    update: function (req, res, resource) {
+      return res.locals.isAdmin;  // admins can update
+    }
+  }
 });
 ```
 
@@ -127,46 +135,46 @@ route(beers);
 
 ```js
 class Beer() {
-	constructor(id, info) {
-		this.id = id;
-		this.edit(info);
-	}
+  constructor(id, info) {
+    this.id = id;
+    this.edit(info);
+  }
 
-	createId() {
-		this.id = this.name;
-		return this.id;
-	}
+  createId() {
+    this.id = this.name;
+    return this.id;
+  }
 
-	edit(info) {
-		this.name = info.name;
-		this.rating = info.rating;
-	}
+  edit(info) {
+    this.name = info.name;
+    this.rating = info.rating;
+  }
 
-	getJpeg(req, res) {
-		res.sendFile('/beer-images/' + this.id + '.jpg');
-	}
+  getJpeg(req, res) {
+    res.sendFile('/beer-images/' + this.id + '.jpg');
+  }
 
-	putJpeg(req, res) {
-		const buffs = [];
-		req.on('data', function (buff) { buffs.push(buff); });
-		req.on('end', () => {
-			require('fs').writeFileSync('/beer-images/' + this.id + '.jpg', Buffer.concat(buffs));
-			res.sendStatus(200);
-		});
-	}
+  putJpeg(req, res) {
+    const buffs = [];
+    req.on('data', function (buff) { buffs.push(buff); });
+    req.on('end', () => {
+      require('fs').writeFileSync('/beer-images/' + this.id + '.jpg', Buffer.concat(buffs));
+      res.sendStatus(200);
+    });
+  }
 
-	deleteJpeg(req, res) {
-		require('fs').unlinkSync('/beer-images/' + this.id + '.jpg');
-		res.sendStatus(200);
-	}
+  deleteJpeg(req, res) {
+    require('fs').unlinkSync('/beer-images/' + this.id + '.jpg');
+    res.sendStatus(200);
+  }
 
-	static getJson(req, res, beersArray) {
-		beersArray.sort((a, b) => {
-			return a.name.localeCompare(b.name);
-		});
+  static getJson(req, res, beersArray) {
+    beersArray.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
 
-		res.status(200).send(beersArray);
-	}
+    res.status(200).send(beersArray);
+  }
 }
 ```
 
@@ -176,39 +184,58 @@ class Beer() {
 
 ```js
 class Beer() {
-	constructor(id, info) {
-		this.id = id;
-		this.edit(info);
-	}
+  constructor(id, info) {
+    this.id = id;
+    this.edit(info);
+  }
 
-	createId() {
-		this.id = this.name;
-		return this.id;
-	}
+  createId() {
+    this.id = this.name;
+    return this.id;
+  }
 
-	edit(info) {
-		this.name = info.name;
-		this.rating = info.rating;
-	}
+  edit(info) {
+    this.name = info.name;
+    this.rating = info.rating;
+  }
 
-	matches(obj) {
-		return this.name.indexOf(obj.name) !== -1;
-	}
+  matches(obj) {
+    return this.name.indexOf(obj.name) !== -1;
+  }
 }
 ```
 
-## Supported REST calls
 
-|           | GET               | POST               | PUT                             | PATCH          | DELETE            |
-| --------- | ----------------- | ------------------ | ------------------------------- | -------------- | ----------------- |
-| /Beer     | Returns all beers | Creates a new beer | Sets the entire beer collection | Not supported  | Deletes all beers |
-| /Beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Updates a beer | Deletes a beer    |
+## HTTP in practice
+
+### HTTP status codes
+
+HTTP status codes returned by express-rested:
+
+* Success: 200 (OK), 201 (Created), 204 (No Content)
+* User error: 400 (Bad Request), 404 (Not Found), 405 (Method Not Allowed), 415 (Unsupported Media Type)
+* Server error: 500 (Internal Server Error)
+
+All 4xx errors are generated by express-rested. All 5xx errors result from user-land code throwing an error or
+returning an error to an asynchronous function (like `persist`).
+
+### Errors
+
+Whenever your code throws an error or returns it to a callback, this error is returned to the client as a text/plain
+human readable response body. If your error object also has a "code" property, it will be returned as an HTTP response
+header called `x-error-code`.
+
+### URI Locations
+
+When you know the name of a collection and the ID of a resource, you can reference both. But when you use POST to create
+a resource, you don't know the ID of the resource. The HTTP response will contain a `Location` header that will contain
+the full path to the newly created resource.
 
 
 ## API
 
-Resource types can be declared as any class or constructor function. There are a few APIs however that you must or may
-implement for things to work.
+Resource types can be declared as an ES6 class or as a constructor function. There are a few APIs however that you must
+or may implement for things to work.
 
 
 ### Resource API
@@ -414,6 +441,12 @@ achieve the same.
 
 Errors find their way to the HTTP client as an Internal Server Error (500). Error also have the automatic effect that
 changes made in the collection will be automatically rolled back.
+
+
+## Debugging
+
+When you want to see which routes are activated by incoming requests, you can enable a debug logger by running your
+application with the `NODE_DEBUG=rested` environment variable set.
 
 
 ## License
