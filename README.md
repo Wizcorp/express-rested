@@ -407,13 +407,19 @@ Returns the resource with the given `id` if it exists, `undefined` otherwise.
 
 Returns all IDs in the collection.
 
+**collection.getList() -> Class[]**
+
+Returns all resources as an array.
+
 **collection.getMap() -> Object**
 
 Returns a copy of the complete map of all resources.
 
-**collection.getList() -> Class[]**
+**collection.getMapRef() -> Object**
 
-Returns all resources as an array.
+Returns a reference to the complete map of all resources that are inside a collection. **Be careful** not to write to
+this object, as it would have likely result in unintended consequences. The most common use-case for this API is to use
+this object for read-only serialization purposes.
 
 **collection.set(string id, Class resource, Function cb)**
 
