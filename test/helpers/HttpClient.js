@@ -74,9 +74,9 @@ class HttpClient {
 		const url = parseUrl(this.baseUrl);
 		url.method = method;
 		url.path = path;
+		url.headers = {};
 
 		if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-			url.headers = url.headers || {};
 			url.headers['content-type'] = 'application/json';
 		}
 

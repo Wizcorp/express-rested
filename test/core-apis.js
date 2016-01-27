@@ -51,10 +51,15 @@ test('Core APIs', function (t) {
 
 		col.request(true).post({ foo: 'bar' }, null, function (context) {
 			t.equal(context.status, 201, 'Created');
+			t.ok(context.isModified(), 'Response without req/res is always considered modified');
 
 			col.request(false).get('foo', null, null, function (context) {
 				t.equal(context.status, 404, 'Not Found');
-				t.end();
+
+				col.request(true).get('foo', 'jpeg', null, function (context) {
+					t.equal(context.status, 415, 'Unsupported Media Type (special extensions require req/res)');
+					t.end();
+				});
 			});
 		});
 	});
@@ -72,7 +77,14 @@ test('Core APIs', function (t) {
 
 		col.del('FooBar', function (error) {
 			t.ifError(error, 'Deleting non-existing is not an error');
+		});
+
+		col.delAll(function () {
 			t.end();
+		});
+
+		col.persist(function () {
+			t.fail('Persist should not be called');
 		});
 	});
 
