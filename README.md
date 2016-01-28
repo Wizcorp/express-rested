@@ -438,6 +438,32 @@ Deletes a single resource from the collection. Triggers the `persist` callback.
 
 Empties the entire collection. Triggers the `persist` callback.
 
+**collection.addIndex(string propertyName)**
+
+Creates an index for all resources, current and future, in the collection. The property name you pass will be inspected
+on every resource that enters the collection, and indexed on that. The value of of the property may be of any type.
+
+This allows you to do quick indexed searches (or rather, lookups) in a collection. In the beer-example above, you could
+for example create an index on the "rating" property. Using the `findOne` and `findAll` methods documented below, you
+can then start fetching these resources.
+
+> Note 1: Creating an index is a heavy operation, so it's best done before adding/loading resources into a collection
+
+> Note 2: Indexes are not used in HTTP operations. They are only useful when directly interfacing with your collection
+
+**collection.delIndex(string propertyName)**
+
+Removes a previously created index from the collection.
+
+**collection.findOne(string propertyName, mixed value)**
+
+Will return a single resource that holds the given value for the given property. If no resource matches, `undefined` is
+returned.
+
+**collection.findAll(string propertyName, mixed value) -> Class[]**
+
+Will return all resources that hold the given value for the given property. If no resources match, `[]` is returned.
+
 **collection.persist(function (string ids[], [Function cb]) { })**
 
 Registers a function that will be called on any change to the collection, and is passed an array of IDs that were
