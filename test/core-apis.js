@@ -46,24 +46,6 @@ test('Core APIs', function (t) {
 		t.end();
 	});
 
-	t.test('Collection requests', function (t) {
-		const col = rested.createCollection(MyResource);
-
-		col.request(true).post({ foo: 'bar' }, null, function (context) {
-			t.equal(context.status, 201, 'Created');
-			t.ok(context.isModified(), 'Response without req/res is always considered modified');
-
-			col.request(false).get('foo', null, null, function (context) {
-				t.equal(context.status, 404, 'Not Found');
-
-				col.request(true).get('foo', 'jpeg', null, function (context) {
-					t.equal(context.status, 415, 'Unsupported Media Type (special extensions require req/res)');
-					t.end();
-				});
-			});
-		});
-	});
-
 	t.test('Collection edge behaviors', function (t) {
 		t.throws(function () {
 			rested.createCollection('Not a class');
