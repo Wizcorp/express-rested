@@ -20,6 +20,9 @@ test('Methods', function (t) {
 		});
 	});
 
+	const crazyId = '!"#$%&\'()=-^~¥|/\\';
+	const crazyIdEnc = encodeURIComponent(crazyId);
+
 	const heineken = {
 		name: 'Heineken',
 		rating: 1
@@ -215,6 +218,30 @@ test('Methods', function (t) {
 
 			collection.unpersist();
 			t.end();
+		});
+	});
+
+	t.test('PUT /rest/beer/' + crazyIdEnc, function (t) {
+		http.put(t, '/rest/beer/' + crazyIdEnc, suntory, function (data, res) {
+			t.equal(res.statusCode, 201, 'HTTP status 201 (Created)');
+			t.ok(res.headers.location, 'Location header returned');
+
+			const id = decodeURIComponent(basename(res.headers.location));
+			t.equal(id, crazyId, 'Crazy ID is correctly returned');
+
+			suntory.id = id;
+
+			http.get(t, '/rest/beer/' + crazyIdEnc, function (data, res) {
+				t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+				t.deepEqual(data, suntory, 'Returned resource is suntory');
+
+				http.delete(t, '/rest/beer/' + crazyIdEnc, function (data, res) {
+					t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
+
+					delete suntory.id;
+					t.end();
+				});
+			});
 		});
 	});
 
