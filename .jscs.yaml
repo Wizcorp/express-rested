@@ -54,6 +54,7 @@ maximumLineLength:
   value: 120
   allowUrlComments: true
 requireCapitalizedConstructors: true
+requireCapitalizedConstructorsNew: true
 safeContextKeyword: ["that"]
 requireDotNotation: except_snake_case
 requireFunctionDeclarations: true
