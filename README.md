@@ -4,27 +4,67 @@
 [![Coverage Status](https://coveralls.io/repos/Wizcorp/express-rested/badge.svg?branch=master&service=github)](https://coveralls.io/github/Wizcorp/express-rested?branch=master)
 
 
-REST is a great way to create an HTTP API to manage resources. It's however a poor API to do rights management on top
-on. Rights management is often based on CRUD (Create, Read, Update, Delete). A REST PUT operation however can mean
-either create or update, depending on the resource already existing or not. The REST rules are simple to follow, but
-when adding any logic, can be a bit of a pain. This module helps you get around that.
+## Why express-rested?
 
-**In essence:**
+### REST in practice
 
-* This module does not require you to set up any routes to manage your resources, it's all done for you.
-* You have full control over rights management (CRUD style).
-* You have full control over how (if) data should persist.
-* Any object can be a resource, you register its constructor (or ES6 class).
-* The resource classes you define can be used in browser as well as in Node.js, so you can write universal JavaScript.
-* Resources are always sent back to the client in JSON format.
-* In URLs, you may refer to resources with or without `.json` extension.
-* You can add support for custom file extensions and behavior in your resources.
-* You can implement search by adding a single function to your resource class.
+[REST](https://en.wikipedia.org/wiki/Representational_state_transfer) is a great style to create an HTTP API to manage
+resources. HTTP methods make it easy to access and manipulate resources based on their URL. There are
+[many](http://swagger.io) [solutions](http://raml.org/) out there that allow you to define REST interfaces and play
+with them. They're great and definitely have their place, but express-rested comes with some different design goals.
 
-**Other characteristics**
+I believe the flexibility that many of these systems provide are actually distracting. The reason why some people prefer
+this flexibility is because REST in terms of HTTP is quite loosely defined (if at all). Therefore everyone and there
+uncle has an opinion on what it means for an API to be truly RESTful and love spending days having religious debates on
+this very topic. I find this a waste of my time, and I hope you agree with me at least on that.
 
-* Zero dependencies
-* 100% unit test code coverage
+Therefore I reasoned that it would be much more rewarding to just decide on one way to implement a REST interface (more
+on this below) and stick with it, end-of-debate. This way we can focus on writing the logic for the resources we want to
+manage, instead of spending all our time debating POST vs. PUT, what a URL should look like and which HTTP status codes
+should really be returned when. With express-rested, these decisions are simply made for you, and you can move on with
+your life. That means this library is absolutely, unapologetically biased. Also, it doesn't care if you don't like it.
+It does, however, care about keeping a very strict separation between what it is and isn't responsible for.
+
+### What else will it do for me?
+
+#### Automatic routing
+
+With one line of code, you can expose a collection of resources to your Express app, and thus to the web. It will
+automatically register routes for the `HEAD`, `GET`, `POST`, `PUT`, `DELETE` HTTP methods for collections, and the
+`HEAD`, `GET`, `PUT`, `PATCH`, `DELETE` methods for resources. That's a lot of bang for your buck.
+
+#### Rights management
+
+Whenever you expose data to the outside world, rights management immediately becomes an issue. While supporting
+virtually every useful HTTP method, I believe CRUD methods (Create, Read, Update, Delete) are the best methods to base
+rights management on. It doesn't have to be more granular than that, nor any less granular. Express-rested easily helps
+you define who is allowed to do what to which resource.
+
+#### Search
+
+Search through HTTP query strings is built right in. So resources a user has the right to access can be filtered any
+way you see fit, based on the user's input.
+
+#### Data Persistence
+
+Well it doesn't really persist data at all. But it will tell you exactly when what changed, so that you're able to
+persist your resources to your favorite datastore.
+
+#### File formats
+
+By default, resources are serialized into JSON, but you can expose a resource using any file type you want and provide
+your own serialization methods.
+
+#### A rich API for in-app access to your data
+
+You can access your resources through collections that you instantiate. These collections have easy to use, powerful
+APIs to manipulate the collection, as well as index (for performance) and search for resources.
+
+
+### Should I trust you?
+
+You don't have to trust me. But you can trust the tests that ship with this library. We make sure to keep 100% code
+coverage, and don't have any external dependencies.
 
 
 ## Installation
@@ -34,19 +74,19 @@ npm install --save express-rested
 ```
 
 
-## Supported REST calls
+## Design Philosophy
 
-|           | GET               | POST               | PUT                             | PATCH          | DELETE            |
-| --------- | ----------------- | ------------------ | ------------------------------- | -------------- | ----------------- |
-| /Beer     | Returns all beers | Creates a new beer | Sets the entire beer collection | Not supported  | Deletes all beers |
-| /Beer/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Updates a beer | Deletes a beer    |
+- You implement your data as classes
+- Instances of these classes are "resources"
+- Resources are collected in "collections"
+- The entire collection is always in-memory, but may be persisted to a datastore
+- The application can access a collection's resources through the collection's API
+- The collection and its resources can be exposed REST-style in Express through a single function call
 
 
 ## Usage
 
 ### Given a resource "Beer"
-
-`resources/Beer.js`
 
 ```js
 class Beer() {
@@ -69,30 +109,77 @@ class Beer() {
 module.exports = Beer;
 ```
 
-### Examples
-
-#### Base example
+#### Search
 
 ```js
-const app = require('express')();
-const rested = require('express-rested');
+class Beer() {
+  /* ... */
 
-const route = rested.route(app);
-const beers = rested.createCollection(require('./resources/Beer'));
-
-route(beers, '/rest/beers', { rights: true });
-
-app.listen(3000);
+  matches(obj) {
+    // obj is the parsed query string of the HTTP request
+    return this.name.indexOf(obj.name) !== -1;
+  }
+}
 ```
 
-#### Persisting data
+#### Custom file extensions
+
+```js
+class Beer() {
+  /* ... */
+
+  getJpeg(req, res) {
+    res.sendFile('/beer-images/' + this.id + '.jpg');
+  }
+
+  putJpeg(req, res) {
+    const buffs = [];
+    req.on('data', function (buff) { buffs.push(buff); });
+    req.on('end', () => {
+      fs.writeFileSync('/beer-images/' + this.id + '.jpg', Buffer.concat(buffs));
+      res.sendStatus(200);
+    });
+  }
+
+  deleteJpeg(req, res) {
+    fs.unlinkSync('/beer-images/' + this.id + '.jpg');
+    res.sendStatus(200);
+  }
+
+  static getJson(req, res, beersArray) {
+    beersArray.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    res.status(200).send(beersArray);
+  }
+}
+```
+
+#### Creating a collection
+
+```js
+const rested = require('express-rested');
+const beers = rested.createCollection(require('./resources/Beer'));
+```
+
+#### Persisting changes
 
 ```js
 beers.loadMap(require('./db/beers.json'));
 
 beers.persist(function (ids, cb) {
-  fs.writeFile('./db/beers.json', JSON.stringify(this), cb);
+  fs.writeFile('./db/beers.json', JSON.stringify(beers), cb);
 });
+```
+
+#### Collection exposure through Express
+
+```js
+const app = require('express')();
+const route = rested.route(app);
+
+route(beers, '/rest/beers', { rights: true });
 ```
 
 #### Rights management
@@ -124,89 +211,18 @@ const route = rested.route(router);
 
 app.use('/rest', router);
 
-// not specifying a path means the collection path will become /rest/Beer
-
-route(beers);
-```
-
-#### Custom file extensions
-
-`resources/Beer.js`
-
-```js
-class Beer() {
-  constructor(id, info) {
-    this.id = id;
-    this.edit(info);
-  }
-
-  createId() {
-    this.id = this.name;
-    return this.id;
-  }
-
-  edit(info) {
-    this.name = info.name;
-    this.rating = info.rating;
-  }
-
-  getJpeg(req, res) {
-    res.sendFile('/beer-images/' + this.id + '.jpg');
-  }
-
-  putJpeg(req, res) {
-    const buffs = [];
-    req.on('data', function (buff) { buffs.push(buff); });
-    req.on('end', () => {
-      require('fs').writeFileSync('/beer-images/' + this.id + '.jpg', Buffer.concat(buffs));
-      res.sendStatus(200);
-    });
-  }
-
-  deleteJpeg(req, res) {
-    require('fs').unlinkSync('/beer-images/' + this.id + '.jpg');
-    res.sendStatus(200);
-  }
-
-  static getJson(req, res, beersArray) {
-    beersArray.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
-
-    res.status(200).send(beersArray);
-  }
-}
-```
-
-#### Search
-
-`resources/Beer.js`
-
-```js
-class Beer() {
-  constructor(id, info) {
-    this.id = id;
-    this.edit(info);
-  }
-
-  createId() {
-    this.id = this.name;
-    return this.id;
-  }
-
-  edit(info) {
-    this.name = info.name;
-    this.rating = info.rating;
-  }
-
-  matches(obj) {
-    return this.name.indexOf(obj.name) !== -1;
-  }
-}
+route(beers, '/beers', { rights: true });
 ```
 
 
 ## HTTP in practice
+
+### Supported HTTP methods
+
+|            | GET               | POST               | PUT                             | PATCH          | DELETE            |
+| ---------- | ----------------- | ------------------ | ------------------------------- | -------------- | ----------------- |
+| /beers     | Returns all beers | Creates a new beer | Sets the entire beer collection | Not supported  | Deletes all beers |
+| /beers/123 | Returns a beer    | Not supported      | Creates or updates a beer       | Updates a beer | Deletes a beer    |
 
 ### HTTP status codes
 
@@ -237,8 +253,7 @@ the full path to the newly created resource.
 Resource types can be declared as an ES6 class or as a constructor function. There are a few APIs however that you must
 or may implement for things to work.
 
-
-### Resource API
+### Your Resource API
 
 Your resource class may expose the following APIs:
 
@@ -308,16 +323,17 @@ You may replace "Ext" in this method name by any file extension you wish to expo
 respond to it.
 
 
-**Notes**
+> Notes
+>
+> No other requirements exist on your resource. That also means that the ID used does not necessarily have to be stored
+> in an `id` property. It may be called anything. Express-rested will never interact with your resource instances
+> beyond:
+>
+> - reading the Class/constructor name (when auto-generating URL paths)
+> - Calling the constructor and methods mentioned above
 
-No other requirements exist on your resource. That also means that the ID used does not necessarily have to be stored in
-an `id` property. It may be called anything. Express-rested will never interact with your resource instances beyond:
 
-* reading the Class/constructor name (when auto-generating URL paths)
-* Calling the constructor and methods mentioned above
-
-
-### Rest library API
+### Express-Rested API
 
 **const rested = require('express-rested');**
 
