@@ -4,6 +4,13 @@
 [![Coverage Status](https://coveralls.io/repos/Wizcorp/express-rested/badge.svg?branch=master&service=github)](https://coveralls.io/github/Wizcorp/express-rested?branch=master)
 
 
+## Installation
+
+```sh
+npm install --save express-rested
+```
+
+
 ## Why express-rested?
 
 ### REST in practice
@@ -67,17 +74,10 @@ You don't have to trust me. But you can trust the tests that ship with this libr
 coverage, and don't have any external dependencies.
 
 
-## Installation
-
-```sh
-npm install --save express-rested
-```
-
-
 ## Design Philosophy
 
-- You implement your data as classes
-- Instances of these classes are "resources"
+- You implement your resources as classes
+- You own these resource classes and should give them any API that works well for you
 - Resources are collected in "collections"
 - The entire collection is always in-memory, but may be persisted to a datastore
 - The application can access a collection's resources through the collection's API
