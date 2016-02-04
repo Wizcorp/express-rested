@@ -2,6 +2,7 @@
 
 const test = require('tape');
 const createServer = require('./helpers/server');
+const rested = require('..');
 
 
 test('No rights', function (t) {
@@ -226,6 +227,57 @@ test('No rights', function (t) {
 			t.equal(res.statusCode, 405, 'HTTP status 405 (Method Not Allowed)');
 			t.equal(res.headers.allow, 'GET, HEAD, POST, PUT, PATCH', 'Allow methods conveyed');
 			t.end();
+		});
+	});
+
+	t.test('Error handling', function (t) {
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			if (!error) {
+				t.fail('No Error object when "error" emitted');
+			}
+			errors += 1;
+		});
+
+		function explode() {
+			throw new Error('Whoops!');
+		}
+
+		route(collection, '/beer-explode', {
+			rights: {
+				create: explode,
+				read: explode,
+				update: explode,
+				delete: explode
+			}
+		});
+
+		collection.loadOne(id, heineken);
+
+		http.get(t, '/rest/beer-explode/' + id, function (data, res) {
+			t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+
+			http.post(t, '/rest/beer-explode', {}, function (data, res) {
+				t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+
+				http.put(t, '/rest/beer-explode/' + id, {}, function (data, res) {
+					t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+
+					http.patch(t, '/rest/beer-explode/' + id, {}, function (data, res) {
+						t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+
+						http.delete(t, '/rest/beer-explode/' + id, function (data, res) {
+							t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+
+							t.equal(errors, 4, 'Four errors emitted');
+
+							rested.removeAllListeners();
+							t.end();
+						});
+					});
+				});
+			});
 		});
 	});
 
