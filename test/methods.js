@@ -3,6 +3,7 @@
 const test = require('tape');
 const createServer = require('./helpers/server');
 const basename = require('path').basename;
+const rested = require('..');
 
 
 test('Methods', function (t) {
@@ -89,13 +90,23 @@ test('Methods', function (t) {
 
 	t.test('POST /rest/beer (save failure)', function (t) {
 		collection.persist(function () {
-			throw new Error('Oh noes!');
+			throw new Error('Oh noes (POST save failure)!');
+		});
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
 		});
 
 		http.post(t, '/rest/beer', heineken, function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error was emitted');
 
 			collection.unpersist();
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});
@@ -153,8 +164,19 @@ test('Methods', function (t) {
 	});
 
 	t.test('POST /rest/beer (Heineken, again)', function (t) {
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
+		});
+
 		http.post(t, '/rest/beer', heineken, function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
+
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});
@@ -210,13 +232,23 @@ test('Methods', function (t) {
 
 	t.test('PUT /rest/beer/SuntoryPremium (save failure)', function (t) {
 		collection.persist(function (ids, cb) {
-			cb(new Error('Oh noes!'));
+			cb(new Error('Oh noes (PUT save failure)!'));
+		});
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
 		});
 
 		http.put(t, '/rest/beer/SuntoryPremium', suntory, function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
 
 			collection.unpersist();
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});
@@ -287,13 +319,23 @@ test('Methods', function (t) {
 
 	t.test('PATCH /rest/beer/Heineken (save failure)', function (t) {
 		collection.persist(function (ids, cb) {
-			cb(new Error('Oh noes!'));
+			cb(new Error('Oh noes (PATCH save failure)!'));
+		});
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
 		});
 
 		http.patch(t, '/rest/beer/Heineken', heineken, function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
 
 			collection.unpersist();
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});
@@ -368,6 +410,18 @@ test('Methods', function (t) {
 		});
 	});
 
+	t.test('GET /rest/beer.txt?name=en (search)', function (t) {
+		http.get(t, '/rest/beer.txt?name=en', function (data, res) {
+			heineken.id = 'Heineken';
+			const expectedData = [demolen, heineken];
+
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data.split('\n').map(JSON.parse), expectedData, 'Heineken and De Molen returned');
+			t.end();
+		});
+	});
+
+
 	t.test('PUT /rest/beer', function (t) {
 		http.put(t, '/rest/beer', allButSuntory, function (data, res) {
 			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
@@ -389,26 +443,46 @@ test('Methods', function (t) {
 
 	t.test('PUT /rest/beer (save failure)', function (t) {
 		collection.persist(function (ids, cb) {
-			cb(new Error('Oh noes!'));
+			cb(new Error('Oh noes (PUT save failure)!'));
+		});
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
 		});
 
 		http.put(t, '/rest/beer', allButSuntory, function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
 
 			collection.unpersist();
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});
 
 	t.test('DELETE /rest/beer/Heineken (save failure)', function (t) {
 		collection.persist(function (ids, cb) {
-			cb(new Error('Oh noes!'));
+			cb(new Error('Oh noes (DELETE save failure)!'));
+		});
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
 		});
 
 		http.delete(t, '/rest/beer/Heineken', function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
 
 			collection.unpersist();
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});
@@ -437,12 +511,23 @@ test('Methods', function (t) {
 
 	t.test('DELETE /rest/beer (save failure)', function (t) {
 		collection.persist(function (ids, cb) {
-			cb(new Error('Oh noes!'));
+			cb(new Error('Oh noes (DELETE save failure)!'));
+		});
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
 		});
 
 		http.delete(t, '/rest/beer', function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
+
 			collection.unpersist();
+			rested.removeAllListeners();
+
 			t.end();
 		});
 	});

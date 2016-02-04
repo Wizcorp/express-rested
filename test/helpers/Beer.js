@@ -31,6 +31,10 @@ class Beer {
 
 	// special extensions
 
+	getThrow() {
+		throw new Error('Whoops');
+	}
+
 	getTxt(req, res) {
 		res.status(200).send('GET .txt');
 	}

@@ -2,6 +2,7 @@
 
 const test = require('tape');
 const createServer = require('./helpers/server');
+const rested = require('..');
 
 
 test('Extensions', function (t) {
@@ -173,6 +174,26 @@ test('Extensions', function (t) {
 				t.equal(res.statusCode, 415, 'HTTP status 415 (Unsupported Media Type)');
 				t.end();
 			});
+		});
+	});
+
+	t.test('Error handling', function (t) {
+		collection.loadOne('Heineken', heineken);
+
+		let errors = 0;
+
+		rested.on('error', function (error) {
+			t.ok(error, 'Error emitted');
+			errors += 1;
+		});
+
+		http.get(t, '/rest/beer/Heineken.throw', function (data, res) {
+			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
+			t.equal(errors, 1, 'One error emitted');
+
+			rested.removeAllListeners();
+
+			t.end();
 		});
 	});
 
