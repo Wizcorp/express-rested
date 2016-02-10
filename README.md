@@ -248,7 +248,7 @@ Whenever your code throws an error or returns it to a callback, this error is re
 human readable response body. If your error object also has a "code" property, it will be returned as an HTTP response
 header called `x-error-code`.
 
-Errors that is thrown by your resources are also emitted as `("warning", error)` on the `rested` object. Other errors
+Errors that are thrown by your resources are also emitted as `("warning", error)` on the `rested` object. Other errors
 are emitted as `("error", error)` on the `rested` object. Keep in mind that Node will consider an `error` event an
 uncaught exception if you are not listening for them, **so register at least an "error" listener**.
 
