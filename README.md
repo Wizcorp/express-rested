@@ -21,7 +21,7 @@ resources. HTTP methods make it easy to access and manipulate resources based on
 with them. They're great and definitely have their place, but express-rested comes with some different design goals.
 
 I believe the flexibility that many of these systems provide are actually distracting. The reason why some people prefer
-this flexibility is because REST in terms of HTTP is quite loosely defined (if at all). Therefore everyone and there
+this flexibility is because REST in terms of HTTP is quite loosely defined (if at all). Therefore everyone and their
 uncle has an opinion on what it means for an API to be truly RESTful and love spending days having religious debates on
 this very topic. I find this a waste of my time, and I hope you agree with me at least on that.
 
