@@ -89,7 +89,7 @@ coverage, and don't have any external dependencies.
 ### Given a resource "Beer"
 
 ```js
-class Beer() {
+class Beer {
   constructor(id, info) {
     this.id = id;
     this.edit(info);
@@ -112,7 +112,7 @@ module.exports = Beer;
 #### Search
 
 ```js
-class Beer() {
+class Beer {
   /* ... */
 
   matches(obj) {
@@ -125,19 +125,20 @@ class Beer() {
 ### Cleanup
 
 ```js
-class Beer() {
-	/* ... */
-	 delete() {
-		 // stop a running process
-		 Banner.stopAdvertising(this.name);
-	 }
+class Beer {
+  /* ... */
+
+  deleted() {
+    // stop a running process
+    banner.stopAdvertising(this.name);
+  }
 }
 ```
 
 #### Custom file extensions
 
 ```js
-class Beer() {
+class Beer {
   /* ... */
 
   getJpeg(req, res) {
