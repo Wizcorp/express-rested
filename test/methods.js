@@ -476,6 +476,7 @@ test('Methods', function (t) {
 			errors += 1;
 		});
 
+
 		http.delete(t, '/rest/beer/Heineken', function (data, res) {
 			t.equal(res.statusCode, 500, 'HTTP status 500 (Internal Server Error)');
 			t.equal(errors, 1, 'One error emitted');
@@ -488,9 +489,15 @@ test('Methods', function (t) {
 	});
 
 	t.test('DELETE /rest/beer/Heineken', function (t) {
+		let deletedName;
+		Beer.prototype.deleted = function () {
+			deletedName = this.name;
+		};
+
 		http.delete(t, '/rest/beer/Heineken', function (data, res) {
 			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
 			t.deepEqual([demolen.id, rochefort.id], collection.getIds().sort(), 'Heineken is out');
+			t.equals(deletedName, 'Heineken', 'Heineken deleted() called');
 			t.end();
 		});
 	});
@@ -533,9 +540,17 @@ test('Methods', function (t) {
 	});
 
 	t.test('DELETE /rest/beer', function (t) {
+		const beerCount = collection.getIds().length;
+		let deleteCount = 0;
+		Beer.prototype.deleted = () => {
+			deleteCount += 1;
+			throw new Error('This should not break anything');
+		};
+
 		http.delete(t, '/rest/beer', function (data, res) {
 			t.equal(res.statusCode, 204, 'HTTP status 204 (No Content)');
 			t.deepEqual([], collection.getIds(), 'All beers are gone');
+			t.equal(deleteCount, beerCount, 'All beers deleted() called');
 			t.end();
 		});
 	});
