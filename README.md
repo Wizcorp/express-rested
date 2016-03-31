@@ -122,6 +122,18 @@ class Beer() {
 }
 ```
 
+### Cleanup
+
+```js
+class Beer() {
+	/* ... */
+	 delete() {
+		 // stop a running process
+		 Banner.stopAdvertising(this.name);
+	 }
+}
+```
+
 #### Custom file extensions
 
 ```js
@@ -300,6 +312,10 @@ Implement this function to allow filtering to happen on your resource collection
 not return `true`, the resource will not end up in the final collection that is being retrieved.
 
 Required for HTTP method: GET with query string
+
+**deleted() (optional)**
+
+This function will be called after the resource is deleted from the collection. You may use this to clean up or disable things tied to your resource instance. Thrown exceptions will be logged (see [Debugging](#debugging)).
 
 **static getExt(express.Request req, express.Response res, Object[] resources)**
 
