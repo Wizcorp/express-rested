@@ -4,10 +4,12 @@ const test = require('tape');
 const rested = require('..');
 const Beer = require('./helpers/Beer');
 
+function idCompare(a, b) {
+	return a.id.localeCompare(b.id);
+}
+
 
 test('Indexes', function (t) {
-	const collection = rested.createCollection(Beer);
-
 	const heineken = {
 		name: 'Heineken',
 		rating: 1
@@ -37,6 +39,7 @@ test('Indexes', function (t) {
 
 
 	t.test('Index on empty collection', function (t) {
+		const collection = rested.createCollection(Beer);
 		collection.addIndex('rating');
 
 		t.throws(function () {
@@ -61,6 +64,7 @@ test('Indexes', function (t) {
 	});
 
 	t.test('Index on non-empty collection', function (t) {
+		const collection = rested.createCollection(Beer);
 		collection.loadMap(all);
 		collection.addIndex('rating');
 
@@ -69,9 +73,7 @@ test('Indexes', function (t) {
 		const foundOne = collection.findOne('rating', 5);
 		t.notEqual(target.indexOf(foundOne), -1, 'Rating 5 resource found');
 
-		const foundAll = collection.findAll('rating', 5).sort(function (a, b) {
-			return a.id.localeCompare(b.id);
-		});
+		const foundAll = collection.findAll('rating', 5).sort(idCompare);
 
 		t.equal(foundAll.length, 2, 'Found 2 beers with rating 5');
 		t.equal(foundAll[0], target[0], 'Found DeMolen');
@@ -90,6 +92,26 @@ test('Indexes', function (t) {
 			t.equal(foundAll[0], target[1], 'Found Rochefort');
 
 			collection.delIndex('rating');
+			t.end();
+		});
+	});
+
+	t.test('Changing values', function (t) {
+		const collection = rested.createCollection(Beer);
+		collection.addIndex('rating');
+		collection.loadMap(all);
+
+		const target = [collection.get('DeMolen'), collection.get('Rochefort')];
+
+		t.deepEqual(collection.findAll('rating', 5).sort(idCompare), target, 'Found 2 beers with rating 5');
+
+		target[0].edit({ rating: 10 });
+
+		collection.set('DeMolen', target[0], function (error) {
+			t.error(error, 'No error on set() callback');
+
+			t.deepEqual(collection.findAll('rating', 5), [target[1]], 'Now only 1 beer with rating 5');
+
 			t.end();
 		});
 	});
