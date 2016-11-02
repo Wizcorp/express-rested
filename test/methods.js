@@ -46,10 +46,31 @@ test('Methods', function (t) {
 	};
 
 	const all = {
+		SuntoryPremium: suntory,
+		Rochefort: rochefort,
+		Heineken: heineken,
+		DeMolen: demolen
+	};
+
+	const allOrderedByRating = {
 		Heineken: heineken,
 		SuntoryPremium: suntory,
 		Rochefort: rochefort,
 		DeMolen: demolen
+	};
+
+	const pageOne = {
+		DeMolen: demolen,
+		Heineken: heineken
+	};
+
+	const pageTwo = {
+		Rochefort: rochefort,
+		SuntoryPremium: suntory
+	};
+
+	const lastPageCutOff = {
+		SuntoryPremium: suntory
 	};
 
 	const enMatchers = {
@@ -421,6 +442,112 @@ test('Methods', function (t) {
 		});
 	});
 
+	t.test('GET /rest/beer?orderBy=rating (order by rating)', function (t) {
+		http.get(t, '/rest/beer?orderBy=rating', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			const dataKeys = Object.keys(data);
+			const orderedKeys = Object.keys(allOrderedByRating);
+			t.deepEqual(dataKeys[0], orderedKeys[0], 'First elemenst is Heineken');
+			t.deepEqual(dataKeys[3], orderedKeys[3], 'Fourth element is Demolen');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?orderBy=badParam (order by not found)', function (t) {
+		http.get(t, '/rest/beer?orderBy=badParam', function (data, res) {
+			t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageSize=2 (paginate: default)', function (t) {
+		http.get(t, '/rest/beer?pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, pageOne, 'DeMolen and Heineken returned');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageSize=0 (paginate: page size too small)', function (t) {
+		http.get(t, '/rest/beer?pageSize=0', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageSize=abc (paginate: page size not number)', function (t) {
+		http.get(t, '/rest/beer?pageSize=abc', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=1&pageSize=2 (paginate: page 1)', function (t) {
+		http.get(t, '/rest/beer?pageNum=1&pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, pageOne, 'DeMolen and Heineken returned');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=2&pageSize=2 (paginate: page 2)', function (t) {
+		http.get(t, '/rest/beer?pageNum=2&pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, pageTwo, 'Rochefort and Suntory returned');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=0&pageSize=2 (paginate: page below minimum)', function (t) {
+		http.get(t, '/rest/beer?pageNum=0&pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=abc&pageSize=2 (paginate: page not number)', function (t) {
+		http.get(t, '/rest/beer?pageNum=abc&pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=1 (paginate: Has pageNum, Mssing pageSize)', function (t) {
+		http.get(t, '/rest/beer?pageNum=1', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=1 (paginate: Has pageAfter, Missing pageSize)', function (t) {
+		http.get(t, '/rest/beer?pageAfter=SuntoryPremium', function (data, res) {
+			t.equal(res.statusCode, 400, 'HTTP status 400 (Bad Request)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageAfter=SuntoryPremium&pageSize=2 (paginate: page after rochefort)', function (t) {
+		http.get(t, '/rest/beer?pageAfter=Rochefort&pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, pageTwo, 'Rochefort and Suntory returned');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageAfter=Missing&pageSize=2 (paginate: page after not found)', function (t) {
+		http.get(t, '/rest/beer?pageAfter=Missing&pageSize=2', function (data, res) {
+			t.equal(res.statusCode, 404, 'HTTP status 404 (Not Found)');
+			t.end();
+		});
+	});
+
+	t.test('GET /rest/beer?pageNum=2&pageSize=3 (paginate: last page cut off)', function (t) {
+		http.get(t, '/rest/beer?pageNum=2&pageSize=3', function (data, res) {
+			t.equal(res.statusCode, 200, 'HTTP status 200 (OK)');
+			t.deepEqual(data, lastPageCutOff, 'Suntory returned');
+			t.end();
+		});
+	});
 
 	t.test('PUT /rest/beer', function (t) {
 		http.put(t, '/rest/beer', allButSuntory, function (data, res) {
